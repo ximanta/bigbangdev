@@ -1,1 +1,14 @@
-import React from 'react';const Card = ({ children, onClick, style = {} }) => {const cardStyle = {backgroundColor:'white',borderRadius:'8px',boxShadow:'0 2px 4px rgba(0,0,0,0.1)',padding:'16px',marginBottom:'16px',cursor:onClick ? 'pointer' : 'default',transition:'transform 0.2s ease',...style};const hoverStyle = onClick ? {':hover':{transform:'translateY(-2px)'}} : {};return(<div style={{...cardStyle,...hoverStyle}} onClick={onClick}>{children}</div>);};export default Card;
+import React from 'react';
+
+const Card = ({ title, children, className = '' }) => {
+  return (
+    <div className={`card ${className}`.trim()}>
+      {title && <div className="card-header">{title}</div>}
+      <div className="card-content">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+export default Card;

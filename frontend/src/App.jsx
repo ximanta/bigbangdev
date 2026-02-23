@@ -14,12 +14,12 @@ const AGENT_MAP = Object.fromEntries(AGENTS.map(a => [a.id, a]))
 export default function App() {
     const [prompt, setPrompt] = useState('')
     const [isRunning, setIsRunning] = useState(false)
-    const [statuses, setStatuses] = useState({})   // agentId -> 'working' | 'done' | 'error'
-    const [activeAgent, setActiveAgent] = useState(null)
-    const [events, setEvents] = useState([])   // unified timeline
+    const [statuses, setStatuses] = useState({})        // agentId -> 'working' | 'done' | 'error'
+    const [activeAgent, setActiveAgent] = useState(null) // spotlight agent (never Doc Engineer — it's background)
+    const [events, setEvents] = useState([])            // unified timeline
     const [files, setFiles] = useState([])
     const [deployUrl, setDeployUrl] = useState(null)
-    const [thinking, setThinking] = useState('')   // latest "thinking" blurb
+    const [thinkingMap, setThinkingMap] = useState({})  // per-agent latest message text
     const [isPreviewExpanded, setIsPreviewExpanded] = useState(false)
     const termRef = useRef(null)
     const sourceRef = useRef(null)
@@ -40,7 +40,7 @@ export default function App() {
         setDeployUrl(null)
         setActiveAgent(null)
         setStatuses({})
-        setThinking('')
+        setThinkingMap({})
         setIsRunning(true)
         if (sourceRef.current) { sourceRef.current.close(); sourceRef.current = null }
 
@@ -59,12 +59,13 @@ export default function App() {
                 const d = JSON.parse(ev.data)
 
                 if (d.agent) {
-                    setActiveAgent(d.agent)
+                    // Doc Engineer is a background worker — never let it steal the spotlight
+                    if (d.agent !== 'Doc Engineer') setActiveAgent(d.agent)
                     setStatuses(prev => ({ ...prev, [d.agent]: d.status }))
                 }
 
                 if (d.data) {
-                    setThinking(d.data)
+                    setThinkingMap(prev => ({ ...prev, [d.agent]: d.data }))
                     addEvent('log', d.agent, d.data, { status: d.status })
                 }
 
@@ -153,6 +154,7 @@ export default function App() {
                                 className={`acard acard-${st} ${isActive ? 'acard-active' : ''}`}
                                 style={{ '--c': ag.color, '--g': ag.glow }}
                             >
+                                <div className="acard-colorbar" />
                                 <div className="acard-top">
                                     <span className="acard-icon">{ag.icon}</span>
                                     <div className="acard-meta">
@@ -165,12 +167,16 @@ export default function App() {
                                         {st === 'error' && <div className="errmark">✗</div>}
                                     </div>
                                 </div>
-                                {isActive && st === 'working' && (
-                                    <div className="acard-thinking">
+                                {/* Show thinking strip for active agent, AND always for Doc Engineer while working */}
+                                {(isActive || ag.id === 'Doc Engineer') && st === 'working' && (
+                                    <div className={`acard-thinking ${ag.id === 'Doc Engineer' ? 'acard-thinking-bg' : ''}`}>
                                         <span className="dot-1">•</span>
                                         <span className="dot-2">•</span>
                                         <span className="dot-3">•</span>
-                                        <span className="thinking-text">{thinking.slice(0, 60)}{thinking.length > 60 ? '…' : ''}</span>
+                                        <span className="thinking-text">
+                                            {(thinkingMap[ag.id] || '').slice(0, 60)}
+                                            {(thinkingMap[ag.id] || '').length > 60 ? '…' : ''}
+                                        </span>
                                     </div>
                                 )}
                             </div>

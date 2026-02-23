@@ -1,1 +1,18 @@
-import React from 'react';const Button = ({ children, onClick, variant = 'primary', style = {}, ...props }) => {const baseStyle = {padding:'10px 15px',borderRadius:'4px',border:'none',cursor:'pointer',fontSize:'1em',fontWeight:'bold',transition:'background-color 0.2s ease'};const primaryStyle = {backgroundColor:'#4CAF50',color:'white'};const secondaryStyle = {backgroundColor:'#f0f0f0',color:'#333',border:'1px solid #ccc'};const disabledStyle = {backgroundColor:'#cccccc',color:'#666666',cursor:'not-allowed'};let buttonSpecificStyle = {};if (variant === 'primary') {buttonSpecificStyle = primaryStyle;} else if (variant === 'secondary') {buttonSpecificStyle = secondaryStyle;}const mergedStyle = {...baseStyle,...buttonSpecificStyle,...style};return(<button onClick={onClick} style={props.disabled ? {...mergedStyle,...disabledStyle} : mergedStyle} {...props}>{children}</button>);};export default Button;
+import React from 'react';
+
+const Button = ({ children, onClick, variant = 'primary', className = '', ...props }) => {
+  const baseClass = 'btn';
+  const variantClass = `btn-${variant}`;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${baseClass} ${variantClass} ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+export default Button;
