@@ -1,0 +1,49 @@
+/* ── THEME 1: "CYBERPUNK NEON" ── */
+/* Replace your :root block with this for a dark, glowing synth-wave vibe */
+:root {
+    --bg: #020005;
+    --bg2: #0d021c;
+    --bg3: #1a0438;
+    --border: #340669;
+    --border2: #4c0f91;
+    --text: #f472b6;
+    --muted: #a855f7;
+    --bright: #2dd4bf;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #eab308;
+}
+
+/* ── THEME 2: "GLASSMORPHIC FROST" ── */
+/* Replace your :root block with this for a clean, icy, semi-transparent modern look */
+:root {
+    --bg: #f8fafc;
+    --bg2: rgba(255, 255, 255, 0.7);
+    --bg3: rgba(241, 245, 249, 0.8);
+    --border: rgba(203, 213, 225, 0.5);
+    --border2: #e2e8f0;
+    --text: #334155;
+    --muted: #64748b;
+    --bright: #0f172a;
+    --green: #059669;
+    --red: #dc2626;
+    --yellow: #d97706;
+}
+
+/* Note: For Glassmorphism, you may want to add `backdrop-filter: blur(10px);` to .header and .agent-sidebar */
+
+/* ── THEME 3: "HACKER MATCHA" ── */
+/* Replace your :root block with this for an organic, dark-mode terminal vibe */
+:root {
+    --bg: #0d110f;
+    --bg2: #131815;
+    --bg3: #1b241c;
+    --border: #263328;
+    --border2: #374b3a;
+    --text: #84a59d;
+    --muted: #5a756b;
+    --bright: #a8e6cf;
+    --green: #4ade80;
+    --red: #fb7185;
+    --yellow: #fde047;
+}

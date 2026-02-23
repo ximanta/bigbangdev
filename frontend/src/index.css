@@ -1,0 +1,767 @@
+/* ── Reset & Base ── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #070b14;
+    --bg2: #0d1424;
+    --bg3: #111827;
+    --border: #1e2d45;
+    --border2: #253550;
+    --text: #cbd5e1;
+    --muted: #475569;
+    --bright: #f1f5f9;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ── App Shell ── */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.55rem 1.25rem;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    box-shadow: 0 1px 24px rgba(0,0,0,0.5);
+}
+
+/* ── BRAND WORDMARK ── */
+.brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 0.1rem;
+}
+
+.brand-wordmark {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+}
+
+.bw-big {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #f1f5f9;
+    letter-spacing: -0.04em;
+}
+
+.bw-dev {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #dc2626;
+    letter-spacing: -0.03em;
+}
+
+.brand-tagline {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+/* ── PROMPT AREA (CLOSEWIRE-style) ── */
+.prompt-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #4a1212;
+    border-radius: 4px;
+    background: #050810;
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+
+.prompt-area:focus-within {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 1px #dc262622;
+}
+
+.prompt-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #7f1d1d;
+    padding: 0.3rem 0.75rem 0;
+    text-transform: uppercase;
+    transition: color 0.2s;
+}
+
+.prompt-area:focus-within .prompt-label {
+    color: #dc2626;
+}
+
+.prompt-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.prompt-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 0.3rem 0.75rem 0.5rem;
+    background: transparent;
+    border: none;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    outline: none;
+    resize: none;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4a1212 transparent;
+}
+
+.prompt-input::-webkit-scrollbar { width: 4px; }
+.prompt-input::-webkit-scrollbar-track { background: transparent; }
+.prompt-input::-webkit-scrollbar-thumb { background: #4a1212; border-radius: 2px; }
+.prompt-input::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+
+.prompt-input:disabled { opacity: 0.45; cursor: not-allowed; }
+.prompt-input::placeholder { color: #2d3a52; }
+
+/* Generate button – LAUNCH ARENA style */
+.gen-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1.1rem;
+    background: transparent;
+    border: none;
+    border-left: 1px solid #4a1212;
+    color: #f1f5f9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    white-space: nowrap;
+    text-transform: uppercase;
+    transition: background 0.15s, border-color 0.15s;
+    align-self: stretch;
+}
+
+.gen-btn:hover:not(:disabled) {
+    background: #1a0505;
+    border-left-color: #dc2626;
+}
+
+.gen-btn.busy {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.gen-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-indicator {
+    display: block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #dc2626;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px #dc2626;
+}
+
+.gen-btn.busy .btn-indicator {
+    background: #f59e0b;
+    box-shadow: 0 0 6px #f59e0b;
+}
+
+.btn-label { flex: 1; }
+
+.btn-chevron {
+    font-size: 1.1rem;
+    line-height: 1;
+    color: #dc2626;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.spin { display: inline-block; animation: spin 0.9s linear infinite; }
+
+/* ── WORKSPACE (3 columns) ── */
+.workspace {
+    display: grid;
+    grid-template-columns: 270px 1fr 300px;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+}
+
+/* ── AGENT SIDEBAR ── */
+.agent-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 0.75rem;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+.panel-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 0.25rem 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.25rem;
+}
+
+.acard {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    background: var(--bg3);
+    transition: all 0.3s ease;
+}
+
+.acard-working {
+    border-color: var(--c);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--g) 50%, transparent),
+        inset 0 0 12px color-mix(in srgb, var(--g) 6%, transparent);
+}
+
+.acard-active {
+    background: color-mix(in srgb, var(--g) 8%, var(--bg3));
+}
+
+.acard-done {
+    border-color: color-mix(in srgb, var(--c) 40%, transparent);
+}
+
+.acard-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.acard-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.acard-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.acard-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--bright);
+}
+
+.acard-desc {
+    font-size: 0.68rem;
+    color: var(--muted);
+}
+
+@keyframes spin2 {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--c, #60a5fa);
+    border-radius: 50%;
+    animation: spin2 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+.checkmark {
+    font-size: 0.9rem;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.errmark {
+    font-size: 0.9rem;
+    color: var(--red);
+    font-weight: 700;
+}
+
+/* Thinking dots animation */
+.acard-thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.7rem;
+    color: var(--muted);
+    overflow: hidden;
+}
+
+@keyframes dot-bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+
+    40% {
+        transform: translateY(-4px);
+        opacity: 1;
+    }
+}
+
+.dot-1 {
+    animation: dot-bounce 1.2s ease-in-out infinite 0s;
+    color: var(--c, #60a5fa);
+}
+
+.dot-2 {
+    animation: dot-bounce 1.2s ease-in-out infinite 0.2s;
+    color: var(--c, #60a5fa);
+}
+
+.dot-3 {
+    animation: dot-bounce 1.2s ease-in-out infinite 0.4s;
+    color: var(--c, #60a5fa);
+    margin-right: 0.35rem;
+}
+
+.thinking-text {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.active-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    background: color-mix(in srgb, var(--c) 8%, transparent);
+    font-size: 0.7rem;
+    color: var(--c);
+    font-weight: 600;
+}
+
+/* ── TERMINAL ── */
+.terminal {
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.term-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.85rem;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+    flex-shrink: 0;
+}
+
+.term-dots {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.td {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.td-r {
+    background: #ff5f57;
+}
+
+.td-y {
+    background: #febc2e;
+}
+
+.td-g {
+    background: #28c840;
+}
+
+.term-title {
+    flex: 1;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+}
+
+.term-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #444;
+}
+
+.term-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b transparent;
+}
+
+.term-idle {
+    color: #2d4464;
+    padding-top: 0.5rem;
+}
+
+.term-prompt {
+    font-size: 0.85rem;
+    color: #2d7a4f;
+}
+
+.term-hint {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Terminal entry animations */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.te {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    animation: fadeInLeft 0.2s ease forwards;
+    margin-bottom: 0.1rem;
+}
+
+.te-agent {
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+}
+
+.te-text {
+    color: #94a3b8;
+}
+
+.te-log.te-done .te-text {
+    color: #64748b;
+}
+
+.te-log.te-working .te-text {
+    color: #cbd5e1;
+}
+
+.te-file .te-check {
+    color: #34d399;
+    font-weight: 700;
+}
+
+.te-file .te-filepath {
+    color: #60a5fa;
+    font-family: inherit;
+}
+
+.te-deploy {
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.te-deploy-tag {
+    background: linear-gradient(135deg, #059669, #2563eb);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+}
+
+.te-url {
+    color: #34d399;
+    text-decoration: none;
+    border-bottom: 1px dashed #34d39966;
+}
+
+.te-url:hover {
+    color: #6ee7b7;
+}
+
+.cursor-line {
+    padding-top: 0.2rem;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.cursor-blink {
+    animation: blink 1s step-start infinite;
+    color: #34d399;
+}
+
+/* ── OUTPUT PANEL ── */
+.output-panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg2);
+    overflow: hidden;
+}
+
+.output-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+}
+
+.output-panel .panel-label {
+    padding: 0.55rem 0;
+    margin: 0;
+}
+
+.expand-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.expand-btn:hover {
+    color: var(--bright);
+}
+
+.output-panel.expanded {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 999;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    background: var(--bg2);
+}
+
+.preview-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #fff;
+}
+
+/* File tree */
+.filetree {
+    flex: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+}
+
+.filetree-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+}
+
+.filetree-root {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-size: 0.75rem;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.filetree-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    margin-left: 0.75rem;
+    border-radius: 4px;
+    animation: slideIn 0.25s ease forwards;
+    transition: background 0.15s;
+}
+
+.filetree-item:hover {
+    background: var(--bg3);
+}
+
+.filetree-item.writing {
+    opacity: 0.5;
+}
+
+.fi-icon {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.fi-name {
+    color: #93c5fd;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Live dot ── */
+@keyframes live-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.7);
+    }
+}
+
+.live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: live-pulse 1s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.live-dot.small {
+    width: 5px;
+    height: 5px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+}
