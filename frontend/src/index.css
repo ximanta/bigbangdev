@@ -91,10 +91,10 @@ body {
 
 .brand-tagline {
     font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    font-size: 0.58rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    color: #475569;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: #7a8fa8;
     text-transform: uppercase;
 }
 
@@ -258,6 +258,30 @@ body {
     padding: 0.65rem 0.75rem;
     background: var(--bg3);
     transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.acard-colorbar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--c);
+    margin: -0.65rem -0.75rem 0.65rem;
+    opacity: 0.45;
+    transition: opacity 0.3s ease, box-shadow 0.3s ease;
+}
+
+.acard-working .acard-colorbar {
+    opacity: 1;
+    box-shadow: 0 0 10px var(--c), 0 0 20px color-mix(in srgb, var(--c) 50%, transparent);
+}
+
+.acard-active .acard-colorbar {
+    opacity: 1;
+    box-shadow: 0 0 14px var(--c), 0 0 28px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.acard-done .acard-colorbar {
+    opacity: 0.6;
 }
 
 .acard-working {
@@ -381,6 +405,12 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Doc Engineer thinks quietly in the background — slightly dimmer */
+.acard-thinking-bg {
+    opacity: 0.75;
+    border-top-style: dashed;
 }
 
 .active-badge {

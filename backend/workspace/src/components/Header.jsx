@@ -1,1 +1,43 @@
-import React from 'react';import { useNavigate } from 'react-router-dom';const Header = () => {const navigate = useNavigate();const headerStyle = {display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',backgroundColor:'#4CAF50',color:'white',boxShadow:'0 2px 4px rgba(0,0,0,0.1)',zIndex:100};const titleStyle = {fontSize:'1.2em',fontWeight:'bold'};const iconButtonStyle = {background:'none',border:'none',color:'white',fontSize:'1.2em',cursor:'pointer',padding:'8px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'};return(<header style={headerStyle}><button style={iconButtonStyle} onClick={() => navigate('/settings')} aria-label="Settings"><i className="fas fa-cog"></i></button><div style={titleStyle}>GreenThumb</div><button style={iconButtonStyle} onClick={() => navigate('/search')} aria-label="Search"><i className="fas fa-search"></i></button></header>);};export default Header;
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, User } from 'lucide-react';
+
+const Header = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    console.log('Searching for:', searchQuery);
+    // In a real app, this would navigate to a search results page
+  };
+
+  return (
+    <header className="header">
+      <Link to="/" className="header-logo">MyGreenThumb</Link>
+      <nav className="header-nav">
+        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/my-garden">My Garden</Link>
+        <Link to="/plant-database">Plants</Link>
+        <Link to="/tasks">Tasks</Link>
+      </nav>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <form onSubmit={handleSearch} className="header-search">
+          <input
+            type="text"
+            placeholder="Search plants..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button type="submit" className="btn-icon search-icon">
+            <Search size={18} />
+          </button>
+        </form>
+        <div className="user-profile">
+          <button><User size={20} /> Login</button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

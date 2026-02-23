@@ -1,1 +1,22 @@
-import React from 'react';const ToggleSwitch = ({ label, checked, onChange, style = {} }) => {const containerStyle = {display:'flex',alignItems:'center',marginBottom:'15px',...style};const labelStyle = {marginRight:'10px',fontSize:'1em',color:'#333'};const switchBaseStyle = {width:'40px',height:'20px',backgroundColor:'#ccc',borderRadius:'10px',position:'relative',cursor:'pointer',transition:'background-color 0.2s'};const switchCheckedStyle = {backgroundColor:'#4CAF50'};const switchThumbStyle = {width:'16px',height:'16px',backgroundColor:'white',borderRadius:'50%',position:'absolute',top:'2px',left:'2px',transition:'transform 0.2s',boxShadow:'0 1px 2px rgba(0,0,0,0.2)'};const switchThumbCheckedStyle = {transform:'translateX(20px)'};return(<div style={containerStyle}><span style={labelStyle}>{label}</span><div style={{...switchBaseStyle, ...(checked && switchCheckedStyle)}} onClick={() => onChange(!checked)}><div style={{...switchThumbStyle, ...(checked && switchThumbCheckedStyle)}}></div></div></div>);};export default ToggleSwitch;
+import React from 'react';
+
+const ToggleSwitch = ({ label, checked, onChange, name, className = '', ...props }) => {
+  return (
+    <div className={`form-group ${className}`.trim()}>
+      {label && <label htmlFor={name || label}>{label}</label>}
+      <label className="toggle-switch">
+        <input
+          type="checkbox"
+          id={name || label}
+          name={name || label}
+          checked={checked}
+          onChange={onChange}
+          {...props}
+        />
+        <span className="slider"></span>
+      </label>
+    </div>
+  );
+};
+
+export default ToggleSwitch;

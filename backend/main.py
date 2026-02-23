@@ -47,19 +47,6 @@ def fix_content(content: str) -> str:
         content = content.replace("\\t", "\t")
     if '\\"' in content:
         content = content.replace('\\"', '"')
-        
-    # If the file is extremely squashed (minified), forcibly add newlines to prevent Babel crashes
-    lines = [L for L in content.split("\n") if L.strip()]
-    if len(lines) < 5 and len(content) > 300:
-        # Heavily squashed file detected! Let's inject safe newlines to help Babel parse JSX
-        content = content.replace(";", ";\n")
-        content = content.replace("const ", "\nconst ")
-        content = content.replace("let ", "\nlet ")
-        content = content.replace("import ", "\nimport ")
-        content = content.replace("export ", "\nexport ")
-        content = content.replace("return (", "\nreturn (\n")
-        content = content.replace("</", "\n</")
-        content = content.replace("/>", "/>\n")
     return content
 
 def find_bad_imports(code_files: dict) -> list[str]:
@@ -112,10 +99,11 @@ async def emit_event(agent: str, status: str, data: str = None, file: str = None
 
 async def architect_node(state: GraphState) -> GraphState:
     agent = "Architect"
-    await emit_event("Doc Engineer", "working", "Monitoring project requirements concurrently...")
+    await emit_event("Doc Engineer", "working", "Initialising documentation framework...")
     await emit_event(agent, "working", "Analyzing requirements and designing system architecture...")
     await asyncio.sleep(0.3)
     await emit_event(agent, "working", "Defining component hierarchy and data flow...")
+    await emit_event("Doc Engineer", "working", "Capturing project scope and objectives...")
 
     prompt = (
         f"Write a concise 3-paragraph Product Requirements Document (PRD) and list the required UI components "
@@ -124,6 +112,7 @@ async def architect_node(state: GraphState) -> GraphState:
     response = await llm.ainvoke(prompt)
     prd = response.content
 
+    await emit_event("Doc Engineer", "working", "PRD received — drafting documentation outline...")
     await emit_event(agent, "working", "Architecture blueprint finalized.")
     await asyncio.sleep(0.2)
     await emit_event(agent, "done", "PRD complete — handing off to Developer.")
@@ -169,6 +158,7 @@ async def developer_node(state: GraphState) -> GraphState:
             await asyncio.to_thread(shutil.rmtree, src_path)
         os.makedirs(src_path, exist_ok=True)
         await emit_event(agent, "working", "Workspace ready. Starting code generation...")
+        await emit_event("Doc Engineer", "working", "Monitoring workspace — tracking generated files...")
 
     prompt_text = (
         f"PRD:\n{state['prd']}\n\n"
@@ -187,7 +177,11 @@ async def developer_node(state: GraphState) -> GraphState:
         "=== FILE RULES ===\n"
         "- ONLY output files whose path starts with 'src/'\n"
         "- DO NOT output package.json, vite.config.js, index.html, or any root file\n"
-        "- Keep components clean and visually appealing\n"
+        "- Keep components clean and visually appealing\n\n"
+        "=== CODE FORMAT — CRITICAL ===\n"
+        "- Output PROPERLY FORMATTED, multi-line source code ONLY\n"
+        "- Every import statement, function declaration, JSX element, and statement MUST be on its own line\n"
+        "- NEVER output minified, compressed, or single-line code — it will fail to parse and be rejected\n"
     )
     if state.get("qa_feedback") and state.get("qa_feedback") != "PASS":
         prompt_text += f"\n=== QA FEEDBACK — FIX THESE BEFORE RESUBMITTING ===\n{state['qa_feedback']}\n"
@@ -220,6 +214,7 @@ async def developer_node(state: GraphState) -> GraphState:
 
         await emit_event(agent, "writing", f"Wrote {f.filepath}", file=f.filepath)
 
+    await emit_event("Doc Engineer", "working", f"Cataloguing {len(code_files)} component(s) for README...")
     await emit_event(agent, "done", f"Code generation complete — {len(code_files)} file(s) written.")
     return {"code_files": code_files, "current_agent": agent}
 
@@ -232,6 +227,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
     agent = "QA Critic"
     loop_count = state.get("loop_count", 0) + 1
 
+    await emit_event("Doc Engineer", "working", "Cross-referencing component list with code output...")
     await emit_event(agent, "working", "Scanning generated files for structural integrity...")
     await asyncio.sleep(0.5)
     await emit_event(agent, "working", "Verifying component exports and import chains...")
@@ -258,6 +254,21 @@ async def qa_critic_node(state: GraphState) -> GraphState:
         await emit_event(agent, "working", f"⚠ Bad imports found: {summary[:80]}. Sending back to Developer.")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
+    # Check 3: Detect minified / single-line files that Babel can't parse
+    await emit_event(agent, "working", "Checking code formatting and line structure...")
+    await asyncio.sleep(0.2)
+    minified_files = find_minified(state.get("code_files", {}))
+    if minified_files:
+        summary = ", ".join(minified_files[:5])
+        feedback = (
+            f"MINIFIED CODE DETECTED in: {summary}. "
+            f"You MUST output properly formatted, multi-line source code. "
+            f"Every import, function, JSX element, and statement must be on its own line. "
+            f"NEVER output minified, compressed, or single-line code — it will fail to build."
+        )
+        await emit_event(agent, "working", f"⚠ Minified output in {summary[:80]}. Rejecting — Dev must rewrite.")
+        return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
+
     await emit_event(agent, "done", "✓ All checks passed. Code quality verified.")
     return {"qa_feedback": "PASS", "loop_count": loop_count, "current_agent": agent}
 
@@ -278,31 +289,87 @@ async def devops_node(state: GraphState) -> GraphState:
     return {"deploy_url": deploy_url, "current_agent": agent}
 
 
+_README_TEMPLATE = """\
+# {title}
+
+> Generated by **BigBang.dev** — AI Software Factory
+> Prompt: _{prompt}_
+
+---
+
+## Quick Start
+
+```bash
+# Install dependencies (already done in workspace)
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Development
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Vite dev server on http://localhost:5173 |
+| `npm run build` | Bundle for production into `dist/` |
+| `npm run preview` | Locally preview the production build |
+
+## Project Structure
+
+```
+workspace/
+├── src/
+│   ├── App.jsx          # Root application component
+│   ├── main.jsx         # React DOM entry point
+│   ├── index.css        # Global styles
+│   └── components/      # Reusable UI components
+│       └── ...
+├── index.html           # HTML entry point
+├── vite.config.js       # Vite configuration
+└── package.json         # Dependencies & scripts
+```
+
+## Tech Stack
+
+- **React 18** — UI library
+- **React Router DOM** — Client-side routing
+- **Vite** — Build tool & dev server
+- **Lucide React** — Icon library
+
+---
+
+_This project was generated autonomously by a multi-agent AI pipeline._
+"""
+
 async def documentation_node(state: GraphState) -> GraphState:
     agent = "Doc Engineer"
-    await emit_event(agent, "working", "Synthesizing project context into README.md...")
-    await asyncio.sleep(0.5)
+    await emit_event(agent, "working", "Finalising README.md with project commands...")
+    await asyncio.sleep(0.4)
 
-    prompt = (
-        f"Write a professional README.md for this Vite + React application based on the PRD.\n\n"
-        f"PRD:\n{state.get('prd', 'A React Application')}\n\n"
-        f"Include Project Title, Features, and Setup Instructions.\n"
-        f"Return ONLY the raw markdown text."
-    )
-    response = await llm.ainvoke(prompt)
-    
-    content = response.content.strip()
-    if content.startswith("```"):
-        content = "\n".join(content.split("\n")[1:])
-    if content.endswith("```"):
-        content = "\n".join(content.split("\n")[:-1])
+    # Derive a human-readable title from the user prompt (no LLM call)
+    raw_prompt = state.get("user_prompt", "My App")
+    title = raw_prompt.strip().rstrip(".")
+    if len(title) > 60:
+        title = title[:57] + "..."
+    # Title-case it if it starts lower
+    if title and title[0].islower():
+        title = title[0].upper() + title[1:]
 
+    readme = _README_TEMPLATE.format(title=title, prompt=raw_prompt)
     readme_path = os.path.join(WORKSPACE_DIR, "README.md")
     with open(readme_path, "w", encoding="utf-8") as fh:
-        fh.write(content.strip())
+        fh.write(readme)
 
     await emit_event(agent, "writing", "Wrote README.md", file="README.md")
-    await emit_event(agent, "done", "Documentation complete.")
+    await asyncio.sleep(0.2)
+    await emit_event(agent, "done", "Documentation complete. README.md ready.")
     return {"current_agent": agent}
 
 
@@ -335,7 +402,7 @@ class GenerateRequest(BaseModel):
 
 
 async def run_magic_trick():
-    await emit_event("Doc Engineer", "working", "Monitoring project requirements concurrently...")
+    await emit_event("Doc Engineer", "working", "Initialising documentation framework...")
     await emit_event("Architect", "working", "Analyzing requirements and designing system architecture...")
     await asyncio.sleep(1)
     await emit_event("Architect", "working", "Defining component hierarchy and data flow...")
@@ -362,10 +429,10 @@ async def run_magic_trick():
     await asyncio.sleep(0.5)
     await emit_event("QA Critic", "done", "✓ All checks passed. Code quality verified.")
 
-    await emit_event("Doc Engineer", "working", "Synthesizing project context into README.md...")
+    await emit_event("Doc Engineer", "working", "Finalising README.md with project commands...")
     await asyncio.sleep(0.8)
     await emit_event("Doc Engineer", "writing", "Wrote README.md", file="README.md")
-    await emit_event("Doc Engineer", "done", "Documentation complete.")
+    await emit_event("Doc Engineer", "done", "Documentation complete. README.md ready.")
 
     await emit_event("DevOps", "working", "Provisioning local runtime environment...")
     await asyncio.sleep(0.6)

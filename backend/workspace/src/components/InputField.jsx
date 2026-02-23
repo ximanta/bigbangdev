@@ -1,1 +1,24 @@
-import React from 'react';const InputField = ({ label, type = 'text', value, onChange, placeholder, style = {}, ...props }) => {const containerStyle = {marginBottom:'15px'};const labelStyle = {display:'block',marginBottom:'5px',fontSize:'0.9em',color:'#333'};const inputStyle = {width:'100%',padding:'10px',border:'1px solid #ccc',borderRadius:'4px',boxSizing:'border-box',fontSize:'1em',...style};return(<div style={containerStyle}><label style={labelStyle}>{label}</label><input type={type} value={value} onChange={onChange} placeholder={placeholder} style={inputStyle} {...props} /></div>);};export default InputField;
+import React from 'react';
+
+const InputField = ({ label, type = 'text', name, value, onChange, placeholder, className = '', isMultiLine = false, ...props }) => {
+  const InputComponent = isMultiLine ? 'textarea' : 'input';
+  const inputClass = isMultiLine ? 'form-control textarea-control' : 'form-control';
+
+  return (
+    <div className={`form-group ${className}`.trim()}>
+      {label && <label htmlFor={name || label}>{label}</label>}
+      <InputComponent
+        type={type}
+        id={name || label}
+        name={name || label}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={inputClass}
+        {...props}
+      />
+    </div>
+  );
+};
+
+export default InputField;
