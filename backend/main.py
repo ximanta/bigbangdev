@@ -409,6 +409,22 @@ async def local_preview_node(state: GraphState) -> GraphState:
     return {"deploy_url": url, "current_agent": "System"}
 
 
+def run_git_ws(args: List[str], capture: bool = False):
+    """Run a git command strictly isolated to the WORKSPACE_DIR .git."""
+    env = os.environ.copy()
+    # Prevent git from looking at parent directories for .git
+    env["GIT_CEILING_DIRECTORIES"] = os.path.dirname(WORKSPACE_DIR)
+    # Force git to use the local .git directory
+    dot_git = os.path.join(WORKSPACE_DIR, ".git")
+    return subprocess.run(
+        args, 
+        cwd=WORKSPACE_DIR, 
+        env=env, 
+        check=True, 
+        capture_output=capture, 
+        text=True if capture else False
+    )
+
 async def devops_engineer_node(state: GraphState) -> GraphState:
     """Phase 2: git add/commit/push to GitHub → triggers Vercel webhook."""
     agent = "DevOps Engineer"
@@ -423,41 +439,37 @@ async def devops_engineer_node(state: GraphState) -> GraphState:
         dot_git = os.path.join(WORKSPACE_DIR, ".git")
         if not os.path.exists(dot_git):
             await emit_event(agent, "working", "🌱 Initializing isolated repository for deployment...")
-            subprocess.run(["git", "init"], cwd=WORKSPACE_DIR, check=True)
-            subprocess.run(["git", "checkout", "-b", "main"], cwd=WORKSPACE_DIR, check=True)
-            subprocess.run(["git", "remote", "add", "origin", repo_url_with_pat], cwd=WORKSPACE_DIR, check=True)
+            run_git_ws(["git", "init"])
+            run_git_ws(["git", "checkout", "-b", "main"])
+            run_git_ws(["git", "remote", "add", "origin", repo_url_with_pat])
         else:
             # Ensure the remote URL is up-to-date with the current PAT
-            subprocess.run(["git", "remote", "set-url", "origin", repo_url_with_pat],
-                           cwd=WORKSPACE_DIR, check=True)
+            run_git_ws(["git", "remote", "set-url", "origin", repo_url_with_pat])
 
-        subprocess.run(["git", "config", "user.email", "ai@bigbang.dev"],
-                       cwd=WORKSPACE_DIR, check=True)
-        subprocess.run(["git", "config", "user.name", "BigBang AI Agent"],
-                       cwd=WORKSPACE_DIR, check=True)
+        run_git_ws(["git", "config", "user.email", "ai@bigbang.dev"])
+        run_git_ws(["git", "config", "user.name", "BigBang AI Agent"])
 
         await emit_event(agent, "working", "📦 Staging all generated source files...")
-        subprocess.run(["git", "add", "."], cwd=WORKSPACE_DIR, check=True)
+        run_git_ws(["git", "add", "."])
         await asyncio.sleep(0.4)
 
         commit_msg = f"🤖 AI Agent Auto-Commit: {prompt}"
         await emit_event(agent, "working", f'✍  Committing: "{commit_msg[:60]}"')
-        result = subprocess.run(
-            ["git", "commit", "-m", commit_msg],
-            cwd=WORKSPACE_DIR, capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            combined = result.stdout + result.stderr
-            if "nothing to commit" in combined or "nothing added to commit" in combined:
+        
+        # We handle commit specially because it might have nothing to commit
+        try:
+            run_git_ws(["git", "commit", "-m", commit_msg])
+        except subprocess.CalledProcessError as e:
+            # Check if it was just "nothing to commit"
+            check_res = run_git_ws(["git", "status"], capture=True)
+            if "nothing to commit" in check_res.stdout or "nothing added to commit" in check_res.stdout:
                 await emit_event(agent, "working", "ℹ  No file changes — pushing existing HEAD...")
             else:
-                raise subprocess.CalledProcessError(
-                    result.returncode, "git commit", result.stdout, result.stderr)
+                raise e
 
         await asyncio.sleep(0.4)
         await emit_event(agent, "working", "🚀 Pushing to GitHub... Vercel webhook incoming!")
-        subprocess.run(["git", "push", "--force", repo_url_with_pat, "main"],
-                       cwd=WORKSPACE_DIR, check=True)
+        run_git_ws(["git", "push", "--force", repo_url_with_pat, "main"])
 
         await asyncio.sleep(0.8)
         await emit_event(agent, "working", "⚡ Vercel caught the webhook — production build running...")
