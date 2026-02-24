@@ -1,1 +1,52 @@
-import React from 'react';import { Link } from 'react-router-dom';import { Globe, BookOpen, User, Zap } from 'lucide-react';function Navbar(){  return (    <nav className="navbar">      <Link        to="/"        className="navbar-brand"      >        Geography Guru      </Link>      <div className="navbar-nav">        <div className="nav-item">          <Link            to="/"            className="nav-link"          >            <Globe              size={18}              style={{ verticalAlign: 'middle', marginRight: '5px' }}            />            Home          </Link>        </div>        <div className="nav-item">          <Link            to="/quizzes"            className="nav-link"          >            <Zap              size={18}              style={{ verticalAlign: 'middle', marginRight: '5px' }}            />            Quizzes          </Link>        </div>        <div className="nav-item">          <Link            to="/learn"            className="nav-link"          >            <BookOpen              size={18}              style={{ verticalAlign: 'middle', marginRight: '5px' }}            />            Learn          </Link>        </div>        <div className="nav-item">          <Link            to="/profile"            className="nav-link"          >            <User              size={18}              style={{ verticalAlign: 'middle', marginRight: '5px' }}            />            Profile          </Link>        </div>      </div>    </nav>  );}export default Navbar;
+import { NavLink } from 'react-router-dom';
+import {
+  Globe,
+  Moon,
+  Asterisk,
+  CircleDot,
+  Info
+} from 'lucide-react';
+
+function Navbar() {
+  return (
+    <nav className="navbar">
+      <NavLink
+        to="/planets"
+        className={({ isActive }) => `navbar-item ${isActive ? 'active' : ''}`}
+      >
+        <Globe />
+        <span>Planets</span>
+      </NavLink>
+      <NavLink
+        to="/moons"
+        className={({ isActive }) => `navbar-item ${isActive ? 'active' : ''}`}
+      >
+        <Moon />
+        <span>Moons</span>
+      </NavLink>
+      <NavLink
+        to="/dwarf-planets"
+        className={({ isActive }) => `navbar-item ${isActive ? 'active' : ''}`}
+      >
+        <Asterisk />
+        <span>Dwarf Planets</span>
+      </NavLink>
+      <NavLink
+        to="/model"
+        className={({ isActive }) => `navbar-item ${isActive ? 'active' : ''}`}
+      >
+        <CircleDot />
+        <span>Model</span>
+      </NavLink>
+      <NavLink
+        to="/about"
+        className={({ isActive }) => `navbar-item ${isActive ? 'active' : ''}`}
+      >
+        <Info />
+        <span>About</span>
+      </NavLink>
+    </nav>
+  );
+}
+
+export default Navbar;

@@ -1,1 +1,21 @@
-import React from 'react';import { useNavigate } from 'react-router-dom';import Button from '../components/Button';function HomePage(){  const navigate = useNavigate();  const handleStartQuiz = () => {    navigate('/quizzes');  };  return (    <div className="container text-center">      <h1>        Welcome to Geography Guru!      </h1>      <p>        Your ultimate app to master world geography through interactive quizzes and a comprehensive fact library.      </p>      <p>        Test your knowledge, learn new facts, and track your progress in a fun and intuitive environment.      </p>      <Button        onClick={handleStartQuiz}        variant="primary"      >        Start Your Geography Journey      </Button>      <div style={{ marginTop: '40px' }}>        <h2>          Featured Content        </h2>        <p>          Discover fascinating facts about countries, capitals, and flags.        </p>        {/* Placeholder for featured content cards if desired */}      </div>    </div>  );}export default HomePage;
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LoadingIndicator from '../components/LoadingIndicator';
+
+function HomePage() {
+  const navigate = useNavigate();
+
+  // Redirect to /planets as the default landing page
+  useEffect(() => {
+    navigate('/planets', { replace: true });
+  }, [navigate]);
+
+  return (
+    <div className="text-center mt-1">
+      <LoadingIndicator />
+      <p>Redirecting to Planets...</p>
+    </div>
+  );
+}
+
+export default HomePage;

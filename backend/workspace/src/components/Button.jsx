@@ -1,1 +1,0 @@
-import React from 'react';function Button({ onClick, children, variant = 'primary', disabled = false }){  const className = `button button-${variant}`;  return (    <button      onClick={onClick}      className={className}      disabled={disabled}    >      {children}    </button>  );}export default Button;
