@@ -1,304 +1,211 @@
-export const solarSystemData = {
-  planets: [
-    {
-      id: 'mercury',
-      name: 'Mercury',
-      description: 'Mercury is the smallest planet in our solar system and closest to the Sun. It is a terrestrial planet with a heavily cratered surface, much like Earth\'s Moon. Its thin atmosphere, or exosphere, is composed mostly of oxygen, sodium, hydrogen, helium, and potassium.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_color_-_Proportionally_color-calibrated_image.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Mercury_by_MESSENGER.jpg/800px-Mercury_by_MESSENGER.jpg'
-      ],
-      facts: {
-        'Diameter': '4,879 km',
-        'Distance from Sun': '57.9 million km',
-        'Orbital Period': '88 Earth days',
-        'Day Length': '59 Earth days',
-        'Surface Temperature': '-173°C to 427°C'
-      },
-      moons: []
-    },
-    {
-      id: 'venus',
-      name: 'Venus',
-      description: 'Venus is the second planet from the Sun and is sometimes called Earth\'s \'sister planet\' because of their similar size and mass. It has a thick, toxic atmosphere filled with carbon dioxide and is shrouded in thick, yellowish clouds of sulfuric acid, trapping heat and causing a runaway greenhouse effect.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/8/85/Venus_transparent.png',
-        'https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg'
-      ],
-      facts: {
-        'Diameter': '12,104 km',
-        'Distance from Sun': '108.2 million km',
-        'Orbital Period': '225 Earth days',
-        'Day Length': '243 Earth days',
-        'Surface Temperature': '462°C'
-      },
-      moons: []
-    },
-    {
-      id: 'earth',
-      name: 'Earth',
-      description: 'Our home planet, Earth, is the third planet from the Sun and the only astronomical object known to harbor life. It is the densest planet in the Solar System and the largest of the four terrestrial planets. Earth\'s atmosphere is 78% nitrogen, 21% oxygen, and other trace gases.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/a/aa/Earth_from_Apollo_17.jpg'
-      ],
-      facts: {
-        'Diameter': '12,742 km',
-        'Distance from Sun': '149.6 million km',
-        'Orbital Period': '365.25 Earth days',
-        'Day Length': '24 hours',
-        'Surface Temperature': '-89°C to 58°C'
-      },
-      moons: [
-        {
-          id: 'the-moon',
-          name: 'The Moon',
-          description: 'Earth\'s Moon is the fifth largest moon in the Solar System. It is thought to have formed after a giant impact between Earth and a Mars-sized body. It stabilizes Earth\'s wobble, which helps to moderate our climate.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/e/e0/FullMoon2010.jpg'
-          ],
-          facts: {
-            'Diameter': '3,474 km',
-            'Orbital Period (Earth)': '27.3 Earth days',
-            'Surface Temperature': '-233°C to 123°C'
-          }
-        }
-      ]
-    },
-    {
-      id: 'mars',
-      name: 'Mars',
-      description: 'Mars is the fourth planet from the Sun and the second smallest planet in the Solar System after Mercury. It is often referred to as the \'Red Planet\' because of its reddish appearance, which is due to iron oxide prevalent on its surface. Mars has a thin atmosphere, primarily carbon dioxide.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Mars_from_Hubble.jpg/800px-Mars_from_Hubble.jpg'
-      ],
-      facts: {
-        'Diameter': '6,779 km',
-        'Distance from Sun': '227.9 million km',
-        'Orbital Period': '687 Earth days',
-        'Day Length': '24.6 hours',
-        'Surface Temperature': '-153°C to 20°C'
-      },
-      moons: [
-        {
-          id: 'phobos',
-          name: 'Phobos',
-          description: 'Phobos is the larger and inner of the two moons of Mars. It is irregularly shaped and heavily cratered. It is gradually spiraling inwards and is expected to either crash into Mars or break up into a planetary ring in 30 to 50 million years.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/5/5c/Phobos_colour_2008.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/c/c9/Phobos_by_Mars_Express.jpg'
-          ],
-          facts: {
-            'Diameter': '22.2 km',
-            'Orbital Period (Mars)': '0.32 Earth days'
-          }
-        },
-        {
-          id: 'deimos',
-          name: 'Deimos',
-          description: 'Deimos is the smaller and outer of the two moons of Mars. Like Phobos, it is irregularly shaped and heavily cratered. Deimos is thought to be a captured asteroid.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/8/87/Deimos_by_Mars_Express_HRSC.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Deimos_from_Viking_2_Orbiter.jpg/800px-Deimos_from_Viking_2_Orbiter.jpg'
-          ],
-          facts: {
-            'Diameter': '12.4 km',
-            'Orbital Period (Mars)': '1.26 Earth days'
-          }
-        }
-      ]
-    },
-    {
-      id: 'jupiter',
-      name: 'Jupiter',
-      description: 'Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a gas giant with a mass more than two and a half times that of all the other planets in the Solar System combined. It is known for its Great Red Spot, a giant storm larger than Earth.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/2/23/Jupiter-transparent.png'
-      ],
-      facts: {
-        'Diameter': '139,820 km',
-        'Distance from Sun': '778.5 million km',
-        'Orbital Period': '11.86 Earth years',
-        'Day Length': '9.9 hours',
-        'Surface Temperature': '-145°C (cloud tops)'
-      },
-      moons: [
-        {
-          id: 'io',
-          name: 'Io',
-          description: 'Io is the most volcanically active world in the Solar System, with hundreds of volcanoes and molten silicate lava flows. This extreme activity is due to the tidal forces exerted by Jupiter and the other Galilean moons.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Io_from_Juno.jpg/800px-Io_from_Juno.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/d/d7/Io_full_disc_true.jpg'
-          ],
-          facts: {
-            'Diameter': '3,643 km',
-            'Orbital Period (Jupiter)': '1.77 Earth days'
-          }
-        },
-        {
-          id: 'europa',
-          name: 'Europa',
-          description: 'Europa is slightly smaller than Earth\'s Moon and is primarily composed of silicate rock and has a water-ice crust. Evidence suggests an ocean of salty liquid water beneath its surface, making it a prime candidate for extraterrestrial life.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/5/51/Europa-moon.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Europa_moon.jpg/800px-Europa_moon.jpg'
-          ],
-          facts: {
-            'Diameter': '3,121 km',
-            'Orbital Period (Jupiter)': '3.55 Earth days'
-          }
-        },
-        {
-          id: 'ganymede',
-          name: 'Ganymede',
-          description: 'Ganymede is the largest moon in the Solar System and is larger than the planet Mercury. It is the only moon known to have its own magnetic field. It is composed of roughly equal amounts of silicate rock and water ice.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/a/ae/Ganymede_--_Juno_Perijove_34_%28enhanced_color%29.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ganymede_full_disk.jpg/800px-Ganymede_full_disk.jpg'
-          ],
-          facts: {
-            'Diameter': '5,262 km',
-            'Orbital Period (Jupiter)': '7.15 Earth days'
-          }
-        },
-        {
-          id: 'callisto',
-          name: 'Callisto',
-          description: 'Callisto is the third-largest moon in the Solar System and is similar in size to Mercury. It is heavily cratered and has a very old, dark surface. Unlike the other Galilean moons, Callisto shows no evidence of significant tidal heating or differentiation.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/e/ec/Callisto_by_Galileo.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Callisto_cutout.png/800px-Callisto_cutout.png'
-          ],
-          facts: {
-            'Diameter': '4,821 km',
-            'Orbital Period (Jupiter)': '16.69 Earth days'
-          }
-        }
-      ]
-    },
-    {
-      id: 'saturn',
-      name: 'Saturn',
-      description: 'Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant best known for its prominent ring system, which is made up of billions of small chunks of ice and rocky material.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox_-_NASA.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Saturn_transparent.png/800px-Saturn_transparent.png'
-      ],
-      facts: {
-        'Diameter': '116,460 km',
-        'Distance from Sun': '1.4 billion km',
-        'Orbital Period': '29.45 Earth years',
-        'Day Length': '10.7 hours',
-        'Surface Temperature': '-178°C (cloud tops)'
-      },
-      moons: [
-        {
-          id: 'titan',
-          name: 'Titan',
-          description: 'Titan is Saturn\'s largest moon and the second largest moon in the Solar System. It is the only moon known to have a dense atmosphere, and the only known body in space, other than Earth, where clear evidence of stable bodies of surface liquid has been found.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Titan_in_true_color.jpg/800px-Titan_in_true_color.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/b/b3/Titan_true_color.jpg'
-          ],
-          facts: {
-            'Diameter': '5,149 km',
-            'Orbital Period (Saturn)': '15.95 Earth days'
-          }
-        },
-        {
-          id: 'enceladus',
-          name: 'Enceladus',
-          description: 'Enceladus is a small, icy moon of Saturn known for its geysers of water vapor and ice particles erupting from its south polar region. These plumes suggest the presence of a subsurface ocean of liquid water, making it another potential candidate for life.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Enceladus_PIA07793.jpg/800px-Enceladus_PIA07793.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/7/77/Enceladus_full_disk_PIA07793.jpg'
-          ],
-          facts: {
-            'Diameter': '504 km',
-            'Orbital Period (Saturn)': '1.37 Earth days'
-          }
-        }
-      ]
-    },
-    {
-      id: 'uranus',
-      name: 'Uranus',
-      description: 'Uranus is the seventh planet from the Sun, an ice giant. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System. Uranus is unique for rotating on its side, with its axis tilted nearly parallel to its orbit.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/3/36/Uranus_transparent.png'
-      ],
-      facts: {
-        'Diameter': '50,724 km',
-        'Distance from Sun': '2.9 billion km',
-        'Orbital Period': '84 Earth years',
-        'Day Length': '17.2 hours',
-        'Surface Temperature': '-224°C (cloud tops)'
-      },
-      moons: [
-        {
-          id: 'titania',
-          name: 'Titania',
-          description: 'Titania is the largest of Uranus\'s moons and the eighth largest moon in the Solar System. It is composed of roughly equal amounts of ice and rock. Its surface is relatively dark and shows evidence of both impact craters and tectonic activity.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Titania_from_Voyager_2.jpg/800px-Titania_from_Voyager_2.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/f/f9/Titania_full_disk.jpg'
-          ],
-          facts: {
-            'Diameter': '1,578 km',
-            'Orbital Period (Uranus)': '8.7 Earth days'
-          }
-        }
-      ]
-    },
-    {
-      id: 'neptune',
-      name: 'Neptune',
-      description: 'Neptune is the eighth and farthest known planet from the Sun in the Solar System. It is an ice giant and is the fourth-largest planet by diameter, the third-most-massive planet, and the densest giant planet. Neptune has the strongest sustained winds of any planet in the Solar System.',
-      images: [
-        'https://upload.wikimedia.org/wikipedia/commons/0/06/Neptune_-_Voyager_2_%2829347980845%29_flatten_high_res.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Neptune_transparent.png/800px-Neptune_transparent.png'
-      ],
-      facts: {
-        'Diameter': '49,244 km',
-        'Distance from Sun': '4.5 billion km',
-        'Orbital Period': '164.8 Earth years',
-        'Day Length': '16.1 hours',
-        'Surface Temperature': '-218°C (cloud tops)'
-      },
-      moons: [
-        {
-          id: 'triton',
-          name: 'Triton',
-          description: 'Triton is the largest moon of Neptune and is unusual because it orbits in a retrograde direction (opposite to Neptune\'s rotation). It is one of the coldest objects in the Solar System and has active geysers that erupt nitrogen ice and dust.',
-          images: [
-            'https://upload.wikimedia.org/wikipedia/commons/a/a2/Triton_color_image_by_Voyager_2.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Triton_from_Voyager_2.jpg/800px-Triton_from_Voyager_2.jpg'
-          ],
-          facts: {
-            'Diameter': '2,706 km',
-            'Orbital Period (Neptune)': '5.88 Earth days'
-          }
-        }
-      ]
-    }
-  ]
-};
-
-export function getPlanetById(id) {
-  return solarSystemData.planets.find(planet => planet.id === id);
-}
-
-export function getMoonById(id) {
-  for (const planet of solarSystemData.planets) {
-    const moon = planet.moons.find(m => m.id === id);
-    if (moon) {
-      return moon;
-    }
+export const solarSystemBodies = [
+  {
+    id: 'sun',
+    name: 'Sun',
+    type: 'Star',
+    description: 'The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core. The Sun has been an object of reverence in many cultures throughout history.',
+    diameter: '1,392,684 km',
+    mass: '1.989 × 10^30 kg',
+    distanceFromSun: '0 km (center)',
+    orbitalPeriod: 'N/A',
+    temperature: '5,778 K (surface)',
+    atmosphere: 'Hydrogen, Helium',
+    moons: [],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Sun_in_X-Ray.png/800px-Sun_in_X-Ray.png'
+    ],
+    geology: 'Composed primarily of hydrogen and helium plasma, the Sun does not have a solid surface. Its structure includes a core, radiative zone, convective zone, photosphere, chromosphere, and corona.',
+    history: 'The Sun has been observed and worshipped since ancient times. Modern scientific study began with Galileo Galilei and the invention of the telescope. Spacecraft like SOHO and Parker Solar Probe continue to study the Sun in unprecedented detail.'
+  },
+  {
+    id: 'mercury',
+    name: 'Mercury',
+    type: 'Planet',
+    description: 'Mercury is the smallest planet in our solar system and closest to the Sun. It is a terrestrial planet with a heavily cratered surface, much like Earth\u0027s Moon. It has a very thin atmosphere.',
+    diameter: '4,879 km',
+    mass: '3.301 × 10^23 kg',
+    distanceFromSun: '57.9 million km',
+    orbitalPeriod: '88 Earth days',
+    temperature: '-173 °C to 427 °C',
+    atmosphere: 'Exosphere (trace amounts of oxygen, sodium, hydrogen, helium, potassium)',
+    moons: [],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/d/d9/Mercury_in_color_-_ProRes.gif',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Mercury_coloured.jpg/800px-Mercury_coloured.jpg'
+    ],
+    geology: 'Mercury has a large iron core that makes up a large portion of its volume. Its surface is covered in impact craters, vast plains, and scarps (cliffs) formed by the planet\u0027s contraction.',
+    history: 'Known since ancient times. Observed by ground-based telescopes for centuries. Visited by NASA\u0027s Mariner 10 in the 1970s and the MESSENGER mission from 2008-2015, which provided detailed mapping.'
+  },
+  {
+    id: 'venus',
+    name: 'Venus',
+    type: 'Planet',
+    description: 'Venus is the second planet from the Sun, often called Earth\u0027s "sister planet" due to their similar size and mass. It has a thick, toxic atmosphere that traps heat in a runaway greenhouse effect, making it the hottest planet in our solar system.',
+    diameter: '12,104 km',
+    mass: '4.867 × 10^24 kg',
+    distanceFromSun: '108.2 million km',
+    orbitalPeriod: '225 Earth days',
+    temperature: '462 °C (average)',
+    atmosphere: 'Carbon Dioxide (96.5%), Nitrogen (3.5%)',
+    moons: [],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/PIA00271_Venus_globe_high_res.jpg/800px-PIA00271_Venus_globe_high_res.jpg'
+    ],
+    geology: 'Venus\u0027s surface is dominated by volcanic features, vast plains, and unique geological structures like "coronae." It lacks plate tectonics similar to Earth.',
+    history: 'Known since ancient times. Many missions, including NASA\u0027s Mariner 2 (first successful planetary flyby), Soviet Venera landers (first to land on another planet), and ESA\u0027s Venus Express, have studied Venus.'
+  },
+  {
+    id: 'earth',
+    name: 'Earth',
+    type: 'Planet',
+    description: 'Earth is the third planet from the Sun and the only astronomical object known to harbor life. It is the densest planet in the Solar System and the largest of the four terrestrial planets.',
+    diameter: '12,742 km',
+    mass: '5.972 × 10^24 kg',
+    distanceFromSun: '149.6 million km',
+    orbitalPeriod: '365.25 days',
+    temperature: '-88 °C to 58 °C',
+    atmosphere: 'Nitrogen (78%), Oxygen (21%), Argon (0.9%), CO2 (0.04%)',
+    moons: ['Moon'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/The_Blue_Marble_%282002%29.png/800px-The_Blue_Marble_%282002%29.png'
+    ],
+    geology: 'Earth\u0027s surface is constantly reshaped by plate tectonics, volcanism, erosion, and weathering. It has a molten outer core and a solid inner core.',
+    history: 'Home to humanity, Earth has been studied extensively from its surface and from space. Thousands of satellites orbit Earth, providing data on its climate, weather, and geology.'
+  },
+  {
+    id: 'moon',
+    name: 'Moon',
+    type: 'Moon',
+    description: 'Earth\u0027s Moon is the fifth-largest natural satellite in the Solar System and the largest relative to the size of the planet it orbits. It is a rocky, airless body with a heavily cratered surface.',
+    diameter: '3,474 km',
+    mass: '7.342 × 10^22 kg',
+    distanceFromSun: '149.6 million km (orbiting Earth)',
+    orbitalPeriod: '27.3 Earth days (around Earth)',
+    temperature: '-233 °C to 123 °C',
+    atmosphere: 'No significant atmosphere (exosphere of trace gases)',
+    moons: [],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/800px-FullMoon2010.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Lunar_farside_as_viewed_by_Apollo_16.jpg/800px-Lunar_farside_as_viewed_by_Apollo_16.jpg'
+    ],
+    geology: 'The Moon\u0027s surface is characterized by maria (dark plains formed by ancient volcanic eruptions) and highlands (light-colored, heavily cratered regions). It has no active plate tectonics.',
+    history: 'Known since ancient times. The target of numerous missions, including the Apollo program which landed humans on its surface, and many robotic orbiters and landers from various nations.'
+  },
+  {
+    id: 'mars',
+    name: 'Mars',
+    type: 'Planet',
+    description: 'Mars is the fourth planet from the Sun and the second-smallest planet in the Solar System. It is often referred to as the "Red Planet" due to its reddish appearance, which is caused by iron oxide prevalent on its surface.',
+    diameter: '6,779 km',
+    mass: '6.417 × 10^23 kg',
+    distanceFromSun: '227.9 million km',
+    orbitalPeriod: '687 Earth days',
+    temperature: '-153 °C to 20 °C',
+    atmosphere: 'Carbon Dioxide (95%), Nitrogen (2.7%), Argon (1.6%)',
+    moons: ['Phobos', 'Deimos'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Mars_-_August_2020_%28cropped%29.jpg/800px-Mars_-_August_2020_%28cropped%29.jpg'
+    ],
+    geology: 'Mars has a diverse surface with polar ice caps, volcanoes (including Olympus Mons, the largest in the Solar System), canyons, and evidence of past liquid water, such as dried riverbeds.',
+    history: 'Known since ancient times. A major focus of space exploration, with numerous orbiters, landers, and rovers (e.g., Viking, Pathfinder, Spirit, Opportunity, Curiosity, Perseverance) studying its geology and potential for past or present life.'
+  },
+  {
+    id: 'jupiter',
+    name: 'Jupiter',
+    type: 'Planet',
+    description: 'Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a gas giant, primarily composed of hydrogen and helium. Its most prominent feature is the Great Red Spot, a giant storm larger than Earth.',
+    diameter: '139,820 km',
+    mass: '1.898 × 10^27 kg',
+    distanceFromSun: '778.5 million km',
+    orbitalPeriod: '11.86 Earth years',
+    temperature: '-145 °C (cloud tops)',
+    atmosphere: 'Hydrogen (90%), Helium (10%)',
+    moons: ['Io', 'Europa', 'Ganymede', 'Callisto', 'and many more'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter.jpg/800px-Jupiter.jpg'
+    ],
+    geology: 'As a gas giant, Jupiter has no solid surface. Its "surface" is often defined as the point where atmospheric pressure equals 1 bar. It has a dense core surrounded by metallic hydrogen.',
+    history: 'Known since ancient times. Visited by Pioneer 10 & 11, Voyager 1 & 2, Galileo, Cassini, and Juno missions, which have provided detailed insights into its atmosphere, magnetic field, and moons.'
+  },
+  {
+    id: 'saturn',
+    name: 'Saturn',
+    type: 'Planet',
+    description: 'Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is best known for its prominent ring system, which is made up of billions of small particles.',
+    diameter: '116,460 km',
+    mass: '5.683 × 10^26 kg',
+    distanceFromSun: '1.4 billion km',
+    orbitalPeriod: '29.45 Earth years',
+    temperature: '-178 °C (cloud tops)',
+    atmosphere: 'Hydrogen (96%), Helium (3%)',
+    moons: ['Titan', 'Rhea', 'Iapetus', 'Dione', 'Tethys', 'and many more'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox_from_Cassini.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Saturn_and_its_moons.jpg/800px-Saturn_and_its_moons.jpg'
+    ],
+    geology: 'Like Jupiter, Saturn is a gas giant with no solid surface. Its atmosphere features strong winds and storms. Its rings are made mostly of water ice particles.',
+    history: 'Known since ancient times. Visited by Pioneer 11, Voyager 1 & 2, and the Cassini-Huygens mission, which spent over a decade studying Saturn and its moons and rings.'
+  },
+  {
+    id: 'uranus',
+    name: 'Uranus',
+    type: 'Planet',
+    description: 'Uranus is the seventh planet from the Sun and the third-largest in diameter. It is an ice giant, composed mostly of water, ammonia, and methane ices. It has a unique axial tilt, causing it to orbit the Sun on its side.',
+    diameter: '50,724 km',
+    mass: '8.681 × 10^25 kg',
+    distanceFromSun: '2.9 billion km',
+    orbitalPeriod: '84 Earth years',
+    temperature: '-224 °C',
+    atmosphere: 'Hydrogen (83%), Helium (15%), Methane (2.3%)',
+    moons: ['Miranda', 'Titania', 'Oberon', 'Umbriel', 'Ariel', 'and many more'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Uranus_and_Rings.jpg/800px-Uranus_and_Rings.jpg'
+    ],
+    geology: 'Uranus is an ice giant, meaning it has a small, rocky core surrounded by a thick, slushy mantle of water, ammonia, and methane ices. Its atmosphere is cold and cloudy.',
+    history: 'Discovered by William Herschel in 1781. Only visited by NASA\u0027s Voyager 2 in 1986, which provided the first close-up images and data about the planet and its moons.'
+  },
+  {
+    id: 'neptune',
+    name: 'Neptune',
+    type: 'Planet',
+    description: 'Neptune is the eighth and farthest known planet from the Sun. It is an ice giant, similar to Uranus, and is known for its strong winds and dynamic weather patterns, including the Great Dark Spot.',
+    diameter: '49,244 km',
+    mass: '1.024 × 10^26 kg',
+    distanceFromSun: '4.5 billion km',
+    orbitalPeriod: '165 Earth years',
+    temperature: '-218 °C',
+    atmosphere: 'Hydrogen (80%), Helium (19%), Methane (1.5%)',
+    moons: ['Triton', 'Nereid', 'and many more'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/0/06/Neptune_-_Voyager_2_%2829347980845%29_flatten_high_res.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Neptune_-_Voyager_2_%2829347980845%29_cropped.jpg/800px-Neptune_-_Voyager_2_%2829347980845%29_cropped.jpg'
+    ],
+    geology: 'Neptune has a structure similar to Uranus, with a rocky core, a mantle of water, ammonia, and methane ices, and a thick atmosphere. It is characterized by active weather systems.',
+    history: 'Predicted mathematically before its discovery by Urbain Le Verrier and Johann Galle in 1846. Only visited by NASA\u0027s Voyager 2 in 1989, which revealed its rings, moons, and atmospheric features.'
+  },
+  {
+    id: 'pluto',
+    name: 'Pluto',
+    type: 'Dwarf Planet',
+    description: 'Pluto is a dwarf planet in the Kuiper Belt, a ring of bodies beyond Neptune. It was once considered the ninth planet but was reclassified in 2006. It has a complex surface with mountains, plains, and glaciers.',
+    diameter: '2,376 km',
+    mass: '1.303 × 10^22 kg',
+    distanceFromSun: '5.9 billion km',
+    orbitalPeriod: '248 Earth years',
+    temperature: '-229 °C to -223 °C',
+    atmosphere: 'Nitrogen, Methane, Carbon Monoxide (thin, transient atmosphere)',
+    moons: ['Charon', 'Styx', 'Nix', 'Kerberos', 'Hydra'],
+    images: [
+      'https://upload.wikimedia.org/wikipedia/commons/e/ef/Pluto_in_True_Color_-_Enhanced_Color.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Pluto_in_True_Color_-_Enhanced_Color.jpg/800px-Pluto_in_True_Color_-_Enhanced_Color.jpg'
+    ],
+    geology: 'Pluto\u0027s surface is geologically active, featuring icy plains (like Sputnik Planitia), mountain ranges (like Norgay Montes), and evidence of cryovolcanism. Its interior may contain a subsurface ocean.',
+    history: 'Discovered by Clyde Tombaugh in 1930. Visited by NASA\u0027s New Horizons mission in 2015, which provided the first detailed images and data, revolutionizing our understanding of this distant world.'
   }
-  return null;
-}
+];

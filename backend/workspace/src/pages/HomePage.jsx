@@ -1,40 +1,37 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
-import PlanetCard from '../components/PlanetCard';
-import { solarSystemData } from '../data/solarSystemData';
+import { Link } from 'react-router-dom';
+import Header from '../components/Header';
+import SolarSystemView from '../components/SolarSystemView';
+import { solarSystemBodies } from '../data/solarSystemData';
 
 function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredPlanets = solarSystemData.planets.filter(planet =>
-    planet.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBodies = solarSystemBodies.filter(body =>
+    body.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="home-page">
-      <Navbar title="Solar System Knowledge Book" />
-
-      <div className="search-container">
-        <input
-          type="text"
-          placeholder="Search planets..."
-          className="search-input"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+    <>
+      <Header onSearch={setSearchTerm} />
+      <div className="home-page">
+        <aside className="sidebar">
+          <h2>Celestial Bodies</h2>
+          <ul className="celestial-list">
+            {filteredBodies.map(body => (
+              <li key={body.id} className="celestial-list-item">
+                <Link to={`/body/${body.id}`} className="link">
+                  {body.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </aside>
+        <main className="main-content">
+          <SolarSystemView />
+        </main>
       </div>
-
-      <div className="planet-grid">
-        {
-          filteredPlanets.map(planet => (
-            <PlanetCard
-              key={planet.id}
-              planet={planet}
-            />
-          ))
-        }
-      </div>
-    </div>
+    </>
   );
 }
 

@@ -55,7 +55,7 @@ body {
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    box-shadow: 0 1px 24px rgba(0,0,0,0.5);
+    box-shadow: 0 1px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* ── BRAND WORDMARK ── */
@@ -153,13 +153,31 @@ body {
     scrollbar-color: #4a1212 transparent;
 }
 
-.prompt-input::-webkit-scrollbar { width: 4px; }
-.prompt-input::-webkit-scrollbar-track { background: transparent; }
-.prompt-input::-webkit-scrollbar-thumb { background: #4a1212; border-radius: 2px; }
-.prompt-input::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+.prompt-input::-webkit-scrollbar {
+    width: 4px;
+}
 
-.prompt-input:disabled { opacity: 0.45; cursor: not-allowed; }
-.prompt-input::placeholder { color: #2d3a52; }
+.prompt-input::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.prompt-input::-webkit-scrollbar-thumb {
+    background: #4a1212;
+    border-radius: 2px;
+}
+
+.prompt-input::-webkit-scrollbar-thumb:hover {
+    background: #dc2626;
+}
+
+.prompt-input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.prompt-input::placeholder {
+    color: #2d3a52;
+}
 
 /* Generate button – LAUNCH ARENA style */
 .gen-btn {
@@ -192,11 +210,15 @@ body {
     cursor: not-allowed;
 }
 
-.gen-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.gen-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
 
 .btn-indicator {
     display: block;
-    width: 7px; height: 7px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #dc2626;
     flex-shrink: 0;
@@ -208,7 +230,9 @@ body {
     box-shadow: 0 0 6px #f59e0b;
 }
 
-.btn-label { flex: 1; }
+.btn-label {
+    flex: 1;
+}
 
 .btn-chevron {
     font-size: 1.1rem;
@@ -217,14 +241,19 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
-.spin { display: inline-block; animation: spin 0.9s linear infinite; }
+
+.spin {
+    display: inline-block;
+    animation: spin 0.9s linear infinite;
+}
 
 /* ── WORKSPACE (3 columns) ── */
 .workspace {
-    display: grid;
-    grid-template-columns: 270px 1fr 300px;
+    display: flex;
     flex: 1;
     overflow: hidden;
     gap: 0;
@@ -232,6 +261,8 @@ body {
 
 /* ── AGENT SIDEBAR ── */
 .agent-sidebar {
+    width: 270px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
@@ -429,6 +460,8 @@ body {
 
 /* ── TERMINAL ── */
 .terminal {
+    flex: 1;
+    min-width: 200px;
     display: flex;
     flex-direction: column;
     background: #000;
@@ -612,10 +645,23 @@ body {
 
 /* ── OUTPUT PANEL ── */
 .output-panel {
+    width: 350px;
+    min-width: 250px;
+    max-width: 70vw;
+    flex-shrink: 0;
+    resize: horizontal;
+    direction: rtl;
+    /* Puts the resize handle on the left side */
     display: flex;
     flex-direction: column;
     background: var(--bg2);
     overflow: hidden;
+    border-left: 1px solid var(--border);
+}
+
+.output-panel>* {
+    direction: ltr;
+    /* Reset text direction for children */
 }
 
 .output-panel .panel-header {
@@ -691,8 +737,15 @@ body {
 }
 
 @keyframes ship-pulse {
-    0%, 100% { box-shadow: 0 0 5px rgba(52, 211, 153, 0.25); }
-    50% { box-shadow: 0 0 14px rgba(52, 211, 153, 0.55), 0 0 26px rgba(52, 211, 153, 0.2); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(52, 211, 153, 0.25);
+    }
+
+    50% {
+        box-shadow: 0 0 14px rgba(52, 211, 153, 0.55), 0 0 26px rgba(52, 211, 153, 0.2);
+    }
 }
 
 /* ── PRODUCTION DEPLOY CELEBRATION ─────────────────────────────────────────── */
@@ -769,13 +822,25 @@ body {
 }
 
 @keyframes rocket-launch {
-    0%   { transform: translateY(0) rotate(-5deg); }
-    100% { transform: translateY(-10px) rotate(5deg); }
+    0% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    100% {
+        transform: translateY(-10px) rotate(5deg);
+    }
 }
 
 @keyframes float-bob {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-6px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
 }
 
 .output-panel.expanded {
@@ -784,6 +849,11 @@ body {
     left: 2rem;
     right: 2rem;
     bottom: 2rem;
+    width: auto;
+    max-width: none;
+    min-width: auto;
+    resize: none;
+    direction: ltr;
     z-index: 999;
     border: 1px solid var(--border);
     border-radius: 12px;
