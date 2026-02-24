@@ -390,8 +390,15 @@ async def qa_critic_node(state: GraphState) -> GraphState:
 
 async def local_preview_node(state: GraphState) -> GraphState:
     """Start Vite dev server and emit local_ready — Phase 1 terminal node."""
-    await emit_event("System", "working", "Starting local preview server...")
-    # Start vite (or let HMR pick up changes if already running)
+    await emit_event("System", "working", "🔄 Refreshing local preview server...")
+    # Kill any existing process on Vite's default port (5173) to avoid port-colliding 'ghost' apps
+    try:
+        subprocess.run("fuser -k 5173/tcp", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        await asyncio.sleep(0.5)
+    except:
+        pass
+
+    # Start vite
     subprocess.Popen("npm run dev", cwd=WORKSPACE_DIR, shell=True,
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     await asyncio.sleep(2)
@@ -412,11 +419,21 @@ async def devops_engineer_node(state: GraphState) -> GraphState:
     await asyncio.sleep(0.5)
 
     try:
+        # Initialize Git in the workspace if it's missing to isolate it from the parent repository
+        dot_git = os.path.join(WORKSPACE_DIR, ".git")
+        if not os.path.exists(dot_git):
+            await emit_event(agent, "working", "🌱 Initializing isolated repository for deployment...")
+            subprocess.run(["git", "init"], cwd=WORKSPACE_DIR, check=True)
+            subprocess.run(["git", "checkout", "-b", "main"], cwd=WORKSPACE_DIR, check=True)
+            subprocess.run(["git", "remote", "add", "origin", repo_url_with_pat], cwd=WORKSPACE_DIR, check=True)
+        else:
+            # Ensure the remote URL is up-to-date with the current PAT
+            subprocess.run(["git", "remote", "set-url", "origin", repo_url_with_pat],
+                           cwd=WORKSPACE_DIR, check=True)
+
         subprocess.run(["git", "config", "user.email", "ai@bigbang.dev"],
                        cwd=WORKSPACE_DIR, check=True)
         subprocess.run(["git", "config", "user.name", "BigBang AI Agent"],
-                       cwd=WORKSPACE_DIR, check=True)
-        subprocess.run(["git", "remote", "set-url", "origin", repo_url_with_pat],
                        cwd=WORKSPACE_DIR, check=True)
 
         await emit_event(agent, "working", "📦 Staging all generated source files...")

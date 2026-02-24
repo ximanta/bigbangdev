@@ -1,1 +1,0 @@
-import React from 'react';function IconButton({Icon, onClick, ariaLabel, className = ''}){return(<button onClick={onClick} aria-label={ariaLabel} className={`icon-button ${className}`}><Icon size={24} /></button>);}export default IconButton;
