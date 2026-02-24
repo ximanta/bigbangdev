@@ -1,0 +1,1 @@
+import React from 'react';function Slider({min, max, step, value, onChange, label}){return(<div className="slider-container"><label htmlFor={label}>{label}:</label><inputid={label}type="range"min={min}max={max}step={step}value={value}onChange={onChange}/></div>);}export default Slider;

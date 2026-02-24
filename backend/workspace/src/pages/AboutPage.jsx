@@ -1,32 +1,55 @@
-import BackButton from '../components/BackButton';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
-function AboutPage() {
+const AboutPage = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="about-page">
-      <div className="detail-header">
-        <BackButton />
-        <h2>About Solar System Explorer</h2>
+    <div
+      className="general-page"
+    >
+      <div
+        className="general-page-header"
+      >
+        <button
+          onClick={() => navigate(-1)}
+          className="icon-button"
+          aria-label="Go back"
+        >
+          <ArrowLeft
+            size={24}
+          />
+        </button>
+        <h1
+          className="general-page-title"
+        >
+          About Solar System Explorer
+        </h1>
       </div>
-      <p>
-        The "Solar System Explorer" is a mobile application designed to provide an engaging and accessible platform
-        for users to learn about the Solar System. It aims to democratize astronomical knowledge, offering a visually
-        rich and factually accurate resource for students, educators, and space enthusiasts alike.
-      </p>
-      <p>
-        This app allows users to browse detailed profiles for the Sun, all eight planets, major dwarf planets,
-        and significant moons. Each profile includes key facts, high-resolution imagery (placeholder in this demo),
-        and concise descriptive text. A robust search function allows quick access to specific celestial bodies.
-        The application also features a basic interactive 2D model showcasing the relative orbital positions of the planets around the Sun.
-      </p>
-      <p>
-        All data presented is scientifically accurate and sourced from reputable astronomical organizations (e.g., NASA, ESA).
-        This application was built with Vite and React, adhering to strict package and styling constraints.
-      </p>
-      <p>
-        <strong className="text-center">Version: 1.0.0</strong>
-      </p>
+
+      <div
+        className="general-page-content"
+      >
+        <p>
+          Version: 1.0.0
+        </p>
+        <p>
+          Developer: AI Assistant
+        </p>
+        <p>
+          Data Sources: NASA, ESA, various astronomical databases.
+        </p>
+        <p>
+          This app is designed to provide an interactive and educational
+          experience of our solar system.
+        </p>
+        <p>
+          &copy; 2023 Solar System Explorer.
+        </p>
+      </div>
     </div>
   );
-}
+};
 
 export default AboutPage;
