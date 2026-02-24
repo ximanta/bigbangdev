@@ -1,42 +1,82 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
 import Header from './components/Header';
-import Footer from './components/Footer';
-import Sidebar from './components/Sidebar';
+import TaskInput from './components/TaskInput';
+import TaskList from './components/TaskList';
+import FilterButtons from './components/FilterButtons';
+import EmptyState from './components/EmptyState';
 
-// Page Components
-import Dashboard from './pages/Dashboard';
-import MyGarden from './pages/MyGarden';
-import PlantDatabase from './pages/PlantDatabase';
-import PlantDetail from './pages/PlantDetail';
-import Planner from './pages/Planner';
-import Tasks from './pages/Tasks';
-import Resources from './pages/Resources';
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed'
 
-const App = () => {
+  const addTask = (title) => {
+    if (title.trim()) {
+      const newTask = {
+        id: Date.now().toString(),
+        title: title.trim(),
+        completed: false,
+      };
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+    }
+  };
+
+  const toggleTaskCompletion = (id) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  const editTaskTitle = (id, newTitle) => {
+    if (newTitle.trim()) {
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, title: newTitle.trim() } : task
+        )
+      );
+    }
+  };
+
+  const deleteTask = (id) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === 'active') {
+      return !task.completed;
+    } else if (filter === 'completed') {
+      return task.completed;
+    } else {
+      return true;
+    }
+  });
+
   return (
-    <div className="app-layout">
+    <div className="app-container">
       <Header />
-      <main className="main-content">
-        <Sidebar />
-        <div className="page-content">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/my-garden" element={<MyGarden />} />
-            <Route path="/plant-database" element={<PlantDatabase />} />
-            <Route path="/plant-database/:id" element={<PlantDetail />} />
-            <Route path="/planner" element={<Planner />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/resources" element={<Resources />} />
-            {/* Add a catch-all for 404 if desired */}
-            <Route path="*" element={<h2>404: Page Not Found</h2>} />
-          </Routes>
-        </div>
-      </main>
-      <Footer />
+
+      <TaskInput onAddTask={addTask} />
+
+      <FilterButtons
+        currentFilter={filter}
+        onFilterChange={setFilter}
+      />
+
+      {filteredTasks.length === 0 && (
+        <EmptyState filter={filter} />
+      )}
+
+      {filteredTasks.length > 0 && (
+        <TaskList
+          tasks={filteredTasks}
+          onToggleComplete={toggleTaskCompletion}
+          onEdit={editTaskTitle}
+          onDelete={deleteTask}
+        />
+      )}
     </div>
   );
-};
+}
 
 export default App;

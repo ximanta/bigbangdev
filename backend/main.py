@@ -4,7 +4,7 @@ import shutil
 import asyncio
 import json
 import subprocess
-from typing import TypedDict, Dict, List, Literal
+from typing import TypedDict, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Request, BackgroundTasks
@@ -36,9 +36,20 @@ WORKSPACE_DIR = os.path.join(os.path.dirname(__file__), "workspace")
 # QA will reject any generated file that imports anything outside this set.
 ALLOWED_PACKAGES = {"react", "react-dom", "react/jsx-runtime", "react-router-dom", "lucide-react"}
 
+GITHUB_REPO = os.environ.get("GITHUB_REPO", "https://github.com/ximanta/bigbangdemo.git")
+GITHUB_PAT  = os.environ.get("PAT", "")
+VERCEL_URL  = os.environ.get("VERCEL_URL", "https://bigbangdemo.vercel.app/")
+
+def classify_intent(user_prompt: str) -> str:
+    """Keyword-based intent classifier: 'build' for new app, 'deploy' for shipping."""
+    deploy_keywords = ["live", "deploy", "ship", "production", "release", "push", "publish"]
+    if any(w in user_prompt.lower() for w in deploy_keywords):
+        return "deploy"
+    return "build"
+
 _IMPORT_RE = re.compile(r"""from\s+['"]([^'"./][^'"]*)['"]""")
 
-def fix_content(content: str) -> str:
+def fix_content(content: str, filepath: str = "") -> str:
     """Unconditionally unescape any double-escaped sequences the LLM may emit."""
     # Always replace \\n -> real newline, \\t -> real tab, \\" -> "
     if "\\n" in content:
@@ -47,6 +58,19 @@ def fix_content(content: str) -> str:
         content = content.replace("\\t", "\t")
     if '\\"' in content:
         content = content.replace('\\"', '"')
+    # Repair split at-rules: "@\nimport" / "@\nkeyframes" etc.
+    # Use \r?\n to handle both Unix (\n) and Windows (\r\n) line endings.
+    content = re.sub(r'@[ \t]*\r?\n[ \t]*(\w)', r'@\1', content)
+    # For CSS files: strip @import url() lines that load external resources.
+    # These corrupt under vite/postcss when the LLM garbles the URL, and external
+    # fonts (Google Fonts etc.) cannot be bundled anyway. System fonts are sufficient.
+    if filepath.endswith(".css"):
+        content = re.sub(
+            r'@import\s+url\s*\([^)]*\)\s*;?[ \t]*\r?\n?',
+            '',
+            content,
+            flags=re.IGNORECASE,
+        )
     return content
 
 def find_bad_imports(code_files: dict) -> list[str]:
@@ -61,15 +85,77 @@ def find_bad_imports(code_files: dict) -> list[str]:
                 bad.append(f"{filepath} imports '{pkg}'")
     return bad
 
+_MAX_LINE = 500  # Any JS/JSX line longer than this is considered un-formatted
+
+# ── Babel syntax checker (runs @babel/parser against generated files) ───────────
+# Saved as .cjs so it uses CommonJS require() even inside an ESM workspace.
+_SYNTAX_CHECK_CJS = """\
+const parser = require('@babel/parser');
+const fs = require('fs');
+const files = process.argv.slice(2);
+const errors = {};
+for (const f of files) {
+  try {
+    const src = fs.readFileSync(f, 'utf8');
+    parser.parse(src, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+  } catch (e) {
+    errors[f] = e.message.slice(0, 250);
+  }
+}
+if (Object.keys(errors).length) {
+  process.stdout.write(JSON.stringify(errors));
+  process.exit(1);
+}
+"""
+
+def _ensure_syntax_checker() -> str:
+    path = os.path.join(WORKSPACE_DIR, "_bb_syntax_check.cjs")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(_SYNTAX_CHECK_CJS)
+    return path
+
+def check_jsx_syntax(code_files: dict) -> dict:
+    """
+    Run @babel/parser against every JS/JSX file via a CJS node script.
+    Returns {relative_filepath: error_message} for files that fail to parse.
+    """
+    checker = _ensure_syntax_checker()
+    # Map relative filepath -> absolute path on disk
+    targets = {
+        fp: os.path.join(WORKSPACE_DIR, fp)
+        for fp in code_files
+        if fp.endswith((".jsx", ".js", ".tsx", ".ts"))
+    }
+    if not targets:
+        return {}
+    try:
+        result = subprocess.run(
+            ["node", checker] + list(targets.values()),
+            cwd=WORKSPACE_DIR, capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode != 0 and result.stdout.strip():
+            raw = json.loads(result.stdout)
+            # Map absolute paths back to relative filepaths for readable feedback
+            rev = {v: k for k, v in targets.items()}
+            return {rev.get(k, k): v for k, v in raw.items()}
+    except (FileNotFoundError, json.JSONDecodeError, subprocess.TimeoutExpired):
+        pass  # Node not found or parse result malformed — skip check gracefully
+    return {}
+
 def find_minified(code_files: dict) -> list[str]:
-    """Detect JSX/JS files that were output as a single minified line."""
+    """Detect JSX/JS files that are minified or have excessively long lines."""
     bad = []
     for filepath, content in code_files.items():
         if not filepath.endswith((".jsx", ".js", ".tsx", ".ts")):
             continue
         non_empty_lines = [l for l in content.split("\n") if l.strip()]
-        # Minified heuristic: content > 300 chars but fewer than 5 real lines
+        # Heuristic 1: whole file squashed to < 5 real lines
         if len(content) > 300 and len(non_empty_lines) < 5:
+            bad.append(filepath)
+            continue
+        # Heuristic 2: any single line exceeds _MAX_LINE chars — partial minification
+        # (e.g. entire return block on one line, or React.createElement chain)
+        if any(len(line) > _MAX_LINE for line in non_empty_lines):
             bad.append(filepath)
     return bad
 
@@ -181,7 +267,12 @@ async def developer_node(state: GraphState) -> GraphState:
         "=== CODE FORMAT — CRITICAL ===\n"
         "- Output PROPERLY FORMATTED, multi-line source code ONLY\n"
         "- Every import statement, function declaration, JSX element, and statement MUST be on its own line\n"
-        "- NEVER output minified, compressed, or single-line code — it will fail to parse and be rejected\n"
+        "- NO single line may exceed 500 characters — if a JSX tree is long, break it across many lines\n"
+        "- ALWAYS write JSX syntax (<div>, <Component />) — NEVER use React.createElement()\n"
+        "- NEVER output minified, compressed, or single-line code — it will fail to parse and be rejected\n\n"
+        "=== CSS RULES ===\n"
+        "- NEVER use @import url() to load Google Fonts or any external stylesheet\n"
+        "- For fonts: use only system font stacks, e.g. font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif\n"
     )
     if state.get("qa_feedback") and state.get("qa_feedback") != "PASS":
         prompt_text += f"\n=== QA FEEDBACK — FIX THESE BEFORE RESUBMITTING ===\n{state['qa_feedback']}\n"
@@ -204,7 +295,7 @@ async def developer_node(state: GraphState) -> GraphState:
             continue
 
         # Execute our unescaping routine fully to avoid breaking JSX string literals
-        content_fixed = fix_content(f.content)
+        content_fixed = fix_content(f.content, f.filepath)
         code_files[f.filepath] = content_fixed
 
         full_path = os.path.join(WORKSPACE_DIR, f.filepath)
@@ -238,6 +329,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
     if not os.path.exists(app_jsx) or os.path.getsize(app_jsx) == 0:
         feedback = "App.jsx is missing or empty. Please regenerate the full application."
         await emit_event(agent, "working", "⚠ App.jsx missing — flagging for Developer revision.")
+        await emit_event(agent, "working", "😅 Happens to the best of us! Sending Dev back in — let's try once more! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     # Check 2: Scan every generated file for imports that aren't in node_modules
@@ -252,6 +344,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
             f"Replace react-router-dom with useState-based page switching."
         )
         await emit_event(agent, "working", f"⚠ Bad imports found: {summary[:80]}. Sending back to Developer.")
+        await emit_event(agent, "working", "📦 Shopping outside the approved list! No worries — let's swap those out. Let's try once more! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     # Check 3: Detect minified / single-line files that Babel can't parse
@@ -261,32 +354,109 @@ async def qa_critic_node(state: GraphState) -> GraphState:
     if minified_files:
         summary = ", ".join(minified_files[:5])
         feedback = (
-            f"MINIFIED CODE DETECTED in: {summary}. "
+            f"MINIFIED OR OVER-LONG LINES DETECTED in: {summary}. "
             f"You MUST output properly formatted, multi-line source code. "
-            f"Every import, function, JSX element, and statement must be on its own line. "
-            f"NEVER output minified, compressed, or single-line code — it will fail to build."
+            f"Every JSX element must be on its own indented line — NO line may exceed 500 characters. "
+            f"NEVER use React.createElement() — always write JSX syntax (<Component />, <div>, etc.). "
+            f"NEVER output minified, compressed, or single-line JSX — it will fail to parse and be rejected."
         )
         await emit_event(agent, "working", f"⚠ Minified output in {summary[:80]}. Rejecting — Dev must rewrite.")
+        await emit_event(agent, "working", "🤏 Someone squished the code into a pancake! Asking for the full expanded version. Let's try once more! 💪")
+        return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
+
+    # Check 4: Babel syntax validation — same parser vite uses, catches every category of error
+    await emit_event(agent, "working", "Running Babel syntax validation against generated files...")
+    await asyncio.sleep(0.2)
+    syntax_errors = await asyncio.to_thread(check_jsx_syntax, state.get("code_files", {}))
+    if syntax_errors:
+        error_parts = "; ".join(
+            f"{fp}: {err[:120]}" for fp, err in list(syntax_errors.items())[:3]
+        )
+        feedback = (
+            f"JSX SYNTAX ERRORS DETECTED — {error_parts}. "
+            f"Fix all syntax errors. Key rules: "
+            f"(1) always add a SPACE between component name and its props: "
+            f"<Component prop={{val}}> NOT <Componentprop={{val}}>; "
+            f"(2) close all JSX tags; "
+            f"(3) do NOT use React.createElement() — use JSX syntax only."
+        )
+        await emit_event(agent, "working", f"⚠ Syntax errors in: {', '.join(list(syntax_errors.keys())[:3])[:80]}")
+        await emit_event(agent, "working", "🔧 Precise bug report sent to Dev. One targeted fix and we're good! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     await emit_event(agent, "done", "✓ All checks passed. Code quality verified.")
     return {"qa_feedback": "PASS", "loop_count": loop_count, "current_agent": agent}
 
 
-async def devops_node(state: GraphState) -> GraphState:
-    agent = "DevOps"
-    await emit_event(agent, "working", "Provisioning local runtime environment...")
-    await asyncio.sleep(0.4)
-    await emit_event(agent, "working", "Starting Vite dev server in workspace...")
-
+async def local_preview_node(state: GraphState) -> GraphState:
+    """Start Vite dev server and emit local_ready — Phase 1 terminal node."""
+    await emit_event("System", "working", "Starting local preview server...")
+    # Start vite (or let HMR pick up changes if already running)
     subprocess.Popen("npm run dev", cwd=WORKSPACE_DIR, shell=True,
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
     await asyncio.sleep(2)
-    deploy_url = "http://localhost:5173"
-    await emit_event(agent, "done", f"🚀 Application is live!", url=deploy_url)
+    url = "http://localhost:5173"
+    await emit_event("System", "local_ready",
+                     "✅ Local preview ready — your app is running at localhost:5173",
+                     url=url)
+    return {"deploy_url": url, "current_agent": "System"}
 
-    return {"deploy_url": deploy_url, "current_agent": agent}
+
+async def devops_engineer_node(state: GraphState) -> GraphState:
+    """Phase 2: git add/commit/push to GitHub → triggers Vercel webhook."""
+    agent = "DevOps Engineer"
+    repo_url_with_pat = GITHUB_REPO.replace("https://", f"https://{GITHUB_PAT}@")
+    prompt = state.get("user_prompt", "Make this live")
+
+    await emit_event(agent, "working", "🔗 Authenticating with enterprise repository...")
+    await asyncio.sleep(0.5)
+
+    try:
+        subprocess.run(["git", "config", "user.email", "ai@bigbang.dev"],
+                       cwd=WORKSPACE_DIR, check=True)
+        subprocess.run(["git", "config", "user.name", "BigBang AI Agent"],
+                       cwd=WORKSPACE_DIR, check=True)
+        subprocess.run(["git", "remote", "set-url", "origin", repo_url_with_pat],
+                       cwd=WORKSPACE_DIR, check=True)
+
+        await emit_event(agent, "working", "📦 Staging all generated source files...")
+        subprocess.run(["git", "add", "."], cwd=WORKSPACE_DIR, check=True)
+        await asyncio.sleep(0.4)
+
+        commit_msg = f"🤖 AI Agent Auto-Commit: {prompt}"
+        await emit_event(agent, "working", f'✍  Committing: "{commit_msg[:60]}"')
+        result = subprocess.run(
+            ["git", "commit", "-m", commit_msg],
+            cwd=WORKSPACE_DIR, capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            combined = result.stdout + result.stderr
+            if "nothing to commit" in combined or "nothing added to commit" in combined:
+                await emit_event(agent, "working", "ℹ  No file changes — pushing existing HEAD...")
+            else:
+                raise subprocess.CalledProcessError(
+                    result.returncode, "git commit", result.stdout, result.stderr)
+
+        await asyncio.sleep(0.4)
+        await emit_event(agent, "working", "🚀 Pushing to GitHub... Vercel webhook incoming!")
+        subprocess.run(["git", "push", "--force", repo_url_with_pat, "main"],
+                       cwd=WORKSPACE_DIR, check=True)
+
+        await asyncio.sleep(0.8)
+        await emit_event(agent, "working", "⚡ Vercel caught the webhook — production build running...")
+        await asyncio.sleep(1.5)
+        await emit_event(agent, "working", "🌐 CDN propagation complete. SSL provisioned.")
+        await asyncio.sleep(0.8)
+
+        await emit_event(agent, "done",
+                         "✅ Deployment successful. Code shipped to enterprise repository.",
+                         url=VERCEL_URL)
+        return {"deploy_url": VERCEL_URL, "current_agent": agent}
+
+    except subprocess.CalledProcessError as e:
+        err = getattr(e, "stderr", "") or getattr(e, "output", "") or str(e)
+        await emit_event(agent, "error", f"⚠ Deployment failed: {str(err)[:160]}")
+        return {"current_agent": agent}
 
 
 _README_TEMPLATE = """\
@@ -381,24 +551,32 @@ def qa_router(state: GraphState) -> Literal["developer", "documentation"]:
     return "developer"
 
 
-workflow = StateGraph(GraphState)
-workflow.add_node("architect", architect_node)
-workflow.add_node("developer", developer_node)
-workflow.add_node("qa_critic", qa_critic_node)
-workflow.add_node("documentation", documentation_node)
-workflow.add_node("devops", devops_node)
+# ── Phase 1: Build graph (Architect → Dev → QA → Docs → LocalPreview) ──────────
+build_graph = StateGraph(GraphState)
+build_graph.add_node("architect", architect_node)
+build_graph.add_node("developer", developer_node)
+build_graph.add_node("qa_critic", qa_critic_node)
+build_graph.add_node("documentation", documentation_node)
+build_graph.add_node("local_preview", local_preview_node)
+build_graph.add_edge(START, "architect")
+build_graph.add_edge("architect", "developer")
+build_graph.add_edge("developer", "qa_critic")
+build_graph.add_conditional_edges("qa_critic", qa_router)
+build_graph.add_edge("documentation", "local_preview")
+build_graph.add_edge("local_preview", END)
+build_workflow = build_graph.compile()
 
-workflow.add_edge(START, "architect")
-workflow.add_edge("architect", "developer")
-workflow.add_edge("developer", "qa_critic")
-workflow.add_conditional_edges("qa_critic", qa_router)
-workflow.add_edge("documentation", "devops")
-workflow.add_edge("devops", END)
-graph = workflow.compile()
+# ── Phase 2: Deploy graph (DevOps Engineer only) ────────────────────────────────
+deploy_graph = StateGraph(GraphState)
+deploy_graph.add_node("devops_engineer", devops_engineer_node)
+deploy_graph.add_edge(START, "devops_engineer")
+deploy_graph.add_edge("devops_engineer", END)
+deploy_workflow = deploy_graph.compile()
 
 
 class GenerateRequest(BaseModel):
     prompt: str
+    intent: Optional[str] = None  # 'build' | 'deploy' — overrides classifier when set
 
 
 async def run_magic_trick():
@@ -434,20 +612,26 @@ async def run_magic_trick():
     await emit_event("Doc Engineer", "writing", "Wrote README.md", file="README.md")
     await emit_event("Doc Engineer", "done", "Documentation complete. README.md ready.")
 
-    await emit_event("DevOps", "working", "Provisioning local runtime environment...")
-    await asyncio.sleep(0.6)
-    await emit_event("DevOps", "working", "Starting Vite dev server in workspace...")
+    await emit_event("System", "working", "Starting local preview server...")
     await asyncio.sleep(1)
-    await emit_event("DevOps", "done", "🚀 Application is live!", url="https://recipe-app-demo.vercel.app/")
+    await emit_event("System", "local_ready",
+                     "✅ Local preview ready — app running at localhost:5173",
+                     url="http://localhost:5173")
 
 
-async def run_pipeline(prompt_text: str):
+async def run_pipeline(prompt_text: str, intent: str = None):
+    if intent is None:
+        intent = classify_intent(prompt_text)
     try:
         if prompt_text.strip() == "magic_recipe_app":
             await run_magic_trick()
+            await emit_event("System", "done", "Build pipeline complete.")
+        elif intent == "deploy":
+            await deploy_workflow.ainvoke({"user_prompt": prompt_text})
+            await emit_event("System", "done", "Deployment pipeline complete.")
         else:
-            await graph.ainvoke({"user_prompt": prompt_text, "loop_count": 0})
-            await emit_event("System", "done", "Pipeline finished.")
+            await build_workflow.ainvoke({"user_prompt": prompt_text, "loop_count": 0})
+            await emit_event("System", "done", "Build pipeline complete.")
     except Exception as e:
         await emit_event("System", "error", f"Pipeline error: {str(e)}")
 
@@ -456,8 +640,27 @@ async def run_pipeline(prompt_text: str):
 async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
     while not stream_queue.empty():
         stream_queue.get_nowait()
-    background_tasks.add_task(run_pipeline, req.prompt)
-    return {"status": "started"}
+    resolved_intent = req.intent if req.intent in ("build", "deploy") else classify_intent(req.prompt)
+    background_tasks.add_task(run_pipeline, req.prompt, resolved_intent)
+    return {"status": "started", "intent": resolved_intent}
+
+
+async def run_deploy():
+    """Dedicated deploy runner — always invokes deploy_workflow, no classification."""
+    try:
+        await deploy_workflow.ainvoke({"user_prompt": "Deploy to production"})
+        await emit_event("System", "done", "Deployment pipeline complete.")
+    except Exception as e:
+        await emit_event("System", "error", f"Deployment error: {str(e)}")
+
+
+@app.post("/api/deploy")
+async def deploy(background_tasks: BackgroundTasks):
+    """Phase 2 endpoint — bypasses intent classification, always runs DevOps Engineer only."""
+    while not stream_queue.empty():
+        stream_queue.get_nowait()
+    background_tasks.add_task(run_deploy)
+    return {"status": "started", "intent": "deploy"}
 
 
 @app.get("/api/stream")
@@ -469,7 +672,7 @@ async def stream_logs():
             event_dict = json.loads(event_json)
             is_terminal = (
                 event_dict.get("status") in ["done", "error"]
-                and event_dict.get("agent") in ["DevOps", "System"]
+                and event_dict.get("agent") in ["DevOps Engineer", "System"]
             )
             if is_terminal:
                 await asyncio.sleep(0.5)

@@ -631,6 +631,12 @@ body {
     margin: 0;
 }
 
+.panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
 .expand-btn {
     background: transparent;
     border: none;
@@ -648,6 +654,45 @@ body {
 
 .expand-btn:hover {
     color: var(--bright);
+}
+
+/* ── SHIP TO PRODUCTION button ──────────────────────────────────────────────── */
+.ship-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: transparent;
+    border: 1px solid #34d399;
+    color: #34d399;
+    border-radius: 5px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: background 0.2s, box-shadow 0.2s;
+    animation: ship-pulse 2s ease-in-out infinite;
+}
+
+.ship-btn:hover {
+    background: rgba(52, 211, 153, 0.12);
+    box-shadow: 0 0 18px rgba(52, 211, 153, 0.6);
+    animation: none;
+}
+
+.ship-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    flex-shrink: 0;
+    animation: live-blink 1s ease-in-out infinite;
+}
+
+@keyframes ship-pulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(52, 211, 153, 0.25); }
+    50% { box-shadow: 0 0 14px rgba(52, 211, 153, 0.55), 0 0 26px rgba(52, 211, 153, 0.2); }
 }
 
 .output-panel.expanded {
