@@ -1,19 +1,18 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, PawPrint, Calendar, HeartPulse, Settings } from 'lucide-react';
 
-function Header({ onLogout }) {
+function Sidebar() {
   return (
-    <header className="header">
-      <Link to="/dashboard" className="header-logo">
-        Pet Overs
-      </Link>
-      <nav className="header-nav">
+    <aside className="sidebar">
+      <nav className="sidebar-nav">
         <ul>
           <li>
             <NavLink
               to="/dashboard"
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
+              <LayoutDashboard size={18} />
               Dashboard
             </NavLink>
           </li>
@@ -22,6 +21,7 @@ function Header({ onLogout }) {
               to="/mypets"
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
+              <PawPrint size={18} />
               My Pets
             </NavLink>
           </li>
@@ -30,6 +30,7 @@ function Header({ onLogout }) {
               to="/schedule"
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
+              <Calendar size={18} />
               Schedule
             </NavLink>
           </li>
@@ -38,6 +39,7 @@ function Header({ onLogout }) {
               to="/health"
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
+              <HeartPulse size={18} />
               Health
             </NavLink>
           </li>
@@ -46,18 +48,14 @@ function Header({ onLogout }) {
               to="/settings"
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
+              <Settings size={18} />
               Settings
             </NavLink>
           </li>
-          <li>
-            <button onClick={onLogout} className="button button-secondary">
-              Logout
-            </button>
-          </li>
         </ul>
       </nav>
-    </header>
+    </aside>
   );
 }
 
-export default Header;
+export default Sidebar;

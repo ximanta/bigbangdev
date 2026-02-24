@@ -214,7 +214,7 @@ class DeveloperOutput(BaseModel):
 
 def restore_boilerplate_files():
     """Copy static config files from boilerplate into workspace so AI can never corrupt them."""
-    for fname in ["package.json", "vite.config.js", "index.html"]:
+    for fname in ["package.json", "vite.config.js", "index.html", ".gitignore"]:
         src = os.path.join(BOILERPLATE_DIR, fname)
         dst = os.path.join(WORKSPACE_DIR, fname)
         if os.path.exists(src):
@@ -329,7 +329,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
     if not os.path.exists(app_jsx) or os.path.getsize(app_jsx) == 0:
         feedback = "App.jsx is missing or empty. Please regenerate the full application."
         await emit_event(agent, "working", "⚠ App.jsx missing — flagging for Developer revision.")
-        await emit_event(agent, "working", "😅 Happens to the best of us! Sending Dev back in — let's try once more! 💪")
+        await emit_event(agent, "done", "😅 Happens to the best of us! Sending Dev back in — let's try once more! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     # Check 2: Scan every generated file for imports that aren't in node_modules
@@ -344,7 +344,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
             f"Replace react-router-dom with useState-based page switching."
         )
         await emit_event(agent, "working", f"⚠ Bad imports found: {summary[:80]}. Sending back to Developer.")
-        await emit_event(agent, "working", "📦 Shopping outside the approved list! No worries — let's swap those out. Let's try once more! 💪")
+        await emit_event(agent, "done", "📦 Shopping outside the approved list! No worries — let's swap those out. Let's try once more! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     # Check 3: Detect minified / single-line files that Babel can't parse
@@ -361,7 +361,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
             f"NEVER output minified, compressed, or single-line JSX — it will fail to parse and be rejected."
         )
         await emit_event(agent, "working", f"⚠ Minified output in {summary[:80]}. Rejecting — Dev must rewrite.")
-        await emit_event(agent, "working", "🤏 Someone squished the code into a pancake! Asking for the full expanded version. Let's try once more! 💪")
+        await emit_event(agent, "done", "🤏 Someone squished the code into a pancake! Asking for the full expanded version. Let's try once more! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     # Check 4: Babel syntax validation — same parser vite uses, catches every category of error
@@ -381,7 +381,7 @@ async def qa_critic_node(state: GraphState) -> GraphState:
             f"(3) do NOT use React.createElement() — use JSX syntax only."
         )
         await emit_event(agent, "working", f"⚠ Syntax errors in: {', '.join(list(syntax_errors.keys())[:3])[:80]}")
-        await emit_event(agent, "working", "🔧 Precise bug report sent to Dev. One targeted fix and we're good! 💪")
+        await emit_event(agent, "done", "🔧 Precise bug report sent to Dev. One targeted fix and we're good! 💪")
         return {"qa_feedback": feedback, "loop_count": loop_count, "current_agent": agent}
 
     await emit_event(agent, "done", "✓ All checks passed. Code quality verified.")

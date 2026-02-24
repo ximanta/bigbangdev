@@ -13,8 +13,9 @@ This project contains a multi-agent AI system (using LangGraph/Python) that take
 - `frontend/`: The React (Vite) User Interface ("Command Center").
 - `backend/`: The FastAPI Python backend running the LangGraph AI multi-agent pipeline.
 - `backend/boilerplate/`: An essential blank React (Vite) template with pre-installed `node_modules`. Instead of letting the AI run `npm install` live, our pipeline swiftly copies this folder to `/workspace` before the AI overrides specific source files.
+## Download
 
-## Environment Variables
+- Download the project from GitHub: `https://github.com/ximanta/bigbangdev.git
 
 ### Backend (`backend/.env`)
 1. Create a `backend/.env` file (you can copy `.env.example`).
@@ -60,11 +61,7 @@ Run the backend server:
 python3 main.py
 ```
 
-*Note: If `python3 main.py` throws `ModuleNotFoundError: No module named 'pydantic'` in WSL, it means `pip` installed the requirements locally rather than in the virtual environment. To fix this, run:*
-```bash
-export PYTHONPATH=~/.local/lib/python3.10/site-packages:$PYTHONPATH
-python3 main.py
-```
+
 *The backend will be available at `http://localhost:8090`.*
 
 ### 2. Frontend (React UI)
@@ -86,4 +83,3 @@ npm run dev
 
 1. Open your browser and navigate to `http://localhost:3001`.
 2. Type an application idea (e.g., "A modern todo list application") and click **Generate App**.
-3. **The Magic Trick (Failsafe):** To bypass the live LLM pipeline (for rehearsal or spotty internet connections), type `magic_recipe_app` into the prompt. The system will artificially stream the agent's actions and output a pre-determined mock URL instantly.

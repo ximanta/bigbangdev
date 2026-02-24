@@ -695,6 +695,89 @@ body {
     50% { box-shadow: 0 0 14px rgba(52, 211, 153, 0.55), 0 0 26px rgba(52, 211, 153, 0.2); }
 }
 
+/* ── PRODUCTION DEPLOY CELEBRATION ─────────────────────────────────────────── */
+.deploy-celebration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    padding: 32px 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 60%, rgba(52, 211, 153, 0.06) 0%, transparent 70%);
+}
+
+.deploy-fireworks {
+    font-size: 2rem;
+    animation: float-bob 2.5s ease-in-out infinite;
+}
+
+.deploy-rocket-icon {
+    font-size: 3.5rem;
+    animation: rocket-launch 1.8s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 18px rgba(52, 211, 153, 0.7));
+}
+
+.deploy-headline {
+    font-family: 'Courier New', monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #34d399;
+    text-shadow: 0 0 16px rgba(52, 211, 153, 0.6);
+}
+
+.deploy-sub {
+    font-size: 0.75rem;
+    color: #64748b;
+    letter-spacing: 0.06em;
+}
+
+.view-live-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 10px 28px;
+    border-radius: 6px;
+    border: 1.5px solid #34d399;
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    animation: ship-pulse 2s ease-in-out infinite;
+}
+
+.view-live-btn:hover {
+    background: rgba(52, 211, 153, 0.22);
+    box-shadow: 0 0 22px rgba(52, 211, 153, 0.55);
+    animation: none;
+}
+
+.deploy-url-display {
+    margin-top: 4px;
+    font-size: 0.68rem;
+    color: #475569;
+    letter-spacing: 0.04em;
+    word-break: break-all;
+}
+
+@keyframes rocket-launch {
+    0%   { transform: translateY(0) rotate(-5deg); }
+    100% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes float-bob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
 .output-panel.expanded {
     position: fixed;
     top: 2rem;

@@ -289,10 +289,13 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* RIGHT: File tree → Preview */}
+                {/* RIGHT: File tree → Local Preview → Production Celebration */}
                 <div className={`output-panel ${isPreviewExpanded ? 'expanded' : ''}`}>
                     <div className="panel-header">
-                        <div className="panel-label">{deployUrl ? 'LIVE PREVIEW' : 'OUTPUT'}</div>
+                        <div className="panel-label">
+                            {deployUrl && !deployUrl.startsWith('http://localhost') ? 'DEPLOYED 🚀' :
+                             deployUrl ? 'LIVE PREVIEW' : 'OUTPUT'}
+                        </div>
                         <div className="panel-actions">
                             {deployUrl?.startsWith('http://localhost') && !isRunning && (
                                 <button className="ship-btn" onClick={handleShip}>
@@ -300,7 +303,7 @@ export default function App() {
                                     SHIP TO PRODUCTION
                                 </button>
                             )}
-                            {deployUrl && (
+                            {deployUrl?.startsWith('http://localhost') && (
                                 <button
                                     className="expand-btn"
                                     onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
@@ -311,7 +314,18 @@ export default function App() {
                             )}
                         </div>
                     </div>
-                    {deployUrl ? (
+                    {deployUrl && !deployUrl.startsWith('http://localhost') ? (
+                        <div className="deploy-celebration">
+                            <div className="deploy-fireworks">🎉</div>
+                            <div className="deploy-rocket-icon">🚀</div>
+                            <div className="deploy-headline">LIVE IN PRODUCTION</div>
+                            <div className="deploy-sub">Your app has been deployed successfully</div>
+                            <a className="view-live-btn" href={deployUrl} target="_blank" rel="noreferrer">
+                                VIEW LIVE SITE ↗
+                            </a>
+                            <div className="deploy-url-display">{deployUrl}</div>
+                        </div>
+                    ) : deployUrl?.startsWith('http://localhost') ? (
                         <iframe src={deployUrl} className="preview-frame" title="Live Preview" />
                     ) : (
                         <div className="filetree">
