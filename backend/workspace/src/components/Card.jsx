@@ -1,14 +1,1 @@
-import React from 'react';
-
-const Card = ({ title, children, className = '' }) => {
-  return (
-    <div className={`card ${className}`.trim()}>
-      {title && <div className="card-header">{title}</div>}
-      <div className="card-content">
-        {children}
-      </div>
-    </div>
-  );
-};
-
-export default Card;
+import React from 'react';function Card({ title, description, imageUrl, onClick }){  return (    <div      className="card"      onClick={onClick}      style={{ cursor: onClick ? 'pointer' : 'default' }}    >      {imageUrl && (        <img          src={imageUrl}          alt={title}          className="card-image"        />      )}      <h3 className="card-title">        {title}      </h3>      {description && (        <p className="card-description">          {description}        </p>      )}    </div>  );}export default Card;

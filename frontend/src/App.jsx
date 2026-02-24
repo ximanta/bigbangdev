@@ -6,10 +6,15 @@ const AGENTS = [
     { id: 'Developer', icon: '💻', label: 'Developer', desc: 'Code Generation', color: '#60a5fa', glow: '#2563eb' },
     { id: 'QA Critic', icon: '🔍', label: 'QA Critic', desc: 'Quality Assurance', color: '#fbbf24', glow: '#d97706' },
     { id: 'Doc Engineer', icon: '📝', label: 'Doc Engineer', desc: 'Documentation', color: '#f472b6', glow: '#db2777' },
-    { id: 'DevOps', icon: '🚀', label: 'DevOps', desc: 'Build & Deploy', color: '#34d399', glow: '#059669' },
+    { id: 'DevOps Engineer', icon: '🚀', label: 'DevOps Engineer', desc: 'GitHub & Deploy', color: '#34d399', glow: '#059669' },
 ]
 
 const AGENT_MAP = Object.fromEntries(AGENTS.map(a => [a.id, a]))
+
+const classifyIntent = (text) => {
+    const deployWords = ['live', 'deploy', 'ship', 'production', 'release', 'push', 'publish']
+    return deployWords.some(w => text.toLowerCase().includes(w)) ? 'deploy' : 'build'
+}
 
 export default function App() {
     const [prompt, setPrompt] = useState('')
@@ -32,23 +37,15 @@ export default function App() {
         setEvents(prev => [...prev, { id: Date.now() + Math.random(), kind, agent, text, ...extra }])
     }
 
-    const handleGenerate = async () => {
-        if (!prompt.trim() || isRunning) return
-        // Reset all state
-        setEvents([])
-        setFiles([])
-        setDeployUrl(null)
-        setActiveAgent(null)
-        setStatuses({})
-        setThinkingMap({})
+    // Shared SSE wiring — call after state reset, with explicit intent so backend never misclassifies
+    const startPipeline = async (promptText, intent) => {
         setIsRunning(true)
         if (sourceRef.current) { sourceRef.current.close(); sourceRef.current = null }
-
         try {
             const res = await fetch('http://localhost:8090/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt: promptText, intent }),
             })
             if (!res.ok) throw new Error('Backend error')
 
@@ -57,30 +54,24 @@ export default function App() {
 
             source.onmessage = (ev) => {
                 const d = JSON.parse(ev.data)
-
                 if (d.agent) {
-                    // Doc Engineer is a background worker — never let it steal the spotlight
                     if (d.agent !== 'Doc Engineer') setActiveAgent(d.agent)
                     setStatuses(prev => ({ ...prev, [d.agent]: d.status }))
                 }
-
                 if (d.data) {
                     setThinkingMap(prev => ({ ...prev, [d.agent]: d.data }))
                     addEvent('log', d.agent, d.data, { status: d.status })
                 }
-
                 if (d.file) {
                     setFiles(prev => [...prev, d.file])
                     addEvent('file', d.agent, d.file)
                 }
-
                 if (d.url) {
                     setDeployUrl(d.url)
                     addEvent('deploy', d.agent, d.url)
                 }
-
                 const isDone = d.status === 'error'
-                    || (d.status === 'done' && (d.agent === 'DevOps' || d.agent === 'System'))
+                    || (d.status === 'done' && (d.agent === 'DevOps Engineer' || d.agent === 'System'))
                 if (isDone) {
                     source.close()
                     sourceRef.current = null
@@ -95,6 +86,71 @@ export default function App() {
             }
         } catch (e) {
             addEvent('log', 'System', `Error: ${e.message}`, { status: 'error' })
+            setIsRunning(false)
+        }
+    }
+
+    const handleGenerate = async () => {
+        if (!prompt.trim() || isRunning) return
+        const intent = classifyIntent(prompt)
+        if (intent === 'build') {
+            setEvents([])
+            setFiles([])
+            setDeployUrl(null)
+            setActiveAgent(null)
+            setStatuses({})
+            setThinkingMap({})
+        } else {
+            setStatuses(prev => { const s = { ...prev }; delete s['DevOps Engineer']; return s })
+            setActiveAgent(null)
+        }
+        await startPipeline(prompt, intent)
+    }
+
+    // One-click deploy — calls /api/deploy directly, never touches /api/generate
+    const handleShip = async () => {
+        if (isRunning) return
+        setStatuses(prev => { const s = { ...prev }; delete s['DevOps Engineer']; return s })
+        setActiveAgent(null)
+        setIsRunning(true)
+        if (sourceRef.current) { sourceRef.current.close(); sourceRef.current = null }
+        try {
+            const res = await fetch('http://localhost:8090/api/deploy', { method: 'POST' })
+            if (!res.ok) throw new Error('Deploy error')
+
+            const source = new EventSource('http://localhost:8090/api/stream')
+            sourceRef.current = source
+
+            source.onmessage = (ev) => {
+                const d = JSON.parse(ev.data)
+                if (d.agent) {
+                    if (d.agent !== 'Doc Engineer') setActiveAgent(d.agent)
+                    setStatuses(prev => ({ ...prev, [d.agent]: d.status }))
+                }
+                if (d.data) {
+                    setThinkingMap(prev => ({ ...prev, [d.agent]: d.data }))
+                    addEvent('log', d.agent, d.data, { status: d.status })
+                }
+                if (d.url) {
+                    setDeployUrl(d.url)
+                    addEvent('deploy', d.agent, d.url)
+                }
+                const isDone = d.status === 'error'
+                    || (d.status === 'done' && (d.agent === 'DevOps Engineer' || d.agent === 'System'))
+                if (isDone) {
+                    source.close()
+                    sourceRef.current = null
+                    setIsRunning(false)
+                    setActiveAgent(null)
+                }
+            }
+            source.onerror = () => {
+                source.close()
+                sourceRef.current = null
+                setIsRunning(false)
+            }
+        } catch (e) {
+            addEvent('log', 'System', `Deploy error: ${e.message}`, { status: 'error' })
             setIsRunning(false)
         }
     }
@@ -233,21 +289,43 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* RIGHT: File tree → Preview */}
+                {/* RIGHT: File tree → Local Preview → Production Celebration */}
                 <div className={`output-panel ${isPreviewExpanded ? 'expanded' : ''}`}>
                     <div className="panel-header">
-                        <div className="panel-label">{deployUrl ? 'LIVE PREVIEW' : 'OUTPUT'}</div>
-                        {deployUrl && (
-                            <button
-                                className="expand-btn"
-                                onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
-                                title={isPreviewExpanded ? "Collapse" : "Expand"}
-                            >
-                                {isPreviewExpanded ? '⤓ Collapse' : '⤢ Expand'}
-                            </button>
-                        )}
+                        <div className="panel-label">
+                            {deployUrl && !deployUrl.startsWith('http://localhost') ? 'DEPLOYED 🚀' :
+                             deployUrl ? 'LIVE PREVIEW' : 'OUTPUT'}
+                        </div>
+                        <div className="panel-actions">
+                            {deployUrl?.startsWith('http://localhost') && !isRunning && (
+                                <button className="ship-btn" onClick={handleShip}>
+                                    <span className="ship-dot" />
+                                    SHIP TO PRODUCTION
+                                </button>
+                            )}
+                            {deployUrl?.startsWith('http://localhost') && (
+                                <button
+                                    className="expand-btn"
+                                    onClick={() => setIsPreviewExpanded(!isPreviewExpanded)}
+                                    title={isPreviewExpanded ? "Collapse" : "Expand"}
+                                >
+                                    {isPreviewExpanded ? '⤓ Collapse' : '⤢ Expand'}
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    {deployUrl ? (
+                    {deployUrl && !deployUrl.startsWith('http://localhost') ? (
+                        <div className="deploy-celebration">
+                            <div className="deploy-fireworks">🎉</div>
+                            <div className="deploy-rocket-icon">🚀</div>
+                            <div className="deploy-headline">LIVE IN PRODUCTION</div>
+                            <div className="deploy-sub">Your app has been deployed successfully</div>
+                            <a className="view-live-btn" href={deployUrl} target="_blank" rel="noreferrer">
+                                VIEW LIVE SITE ↗
+                            </a>
+                            <div className="deploy-url-display">{deployUrl}</div>
+                        </div>
+                    ) : deployUrl?.startsWith('http://localhost') ? (
                         <iframe src={deployUrl} className="preview-frame" title="Live Preview" />
                     ) : (
                         <div className="filetree">
